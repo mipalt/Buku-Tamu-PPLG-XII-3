@@ -133,7 +133,10 @@
         <textarea name="purpose" value="{{ old('purpose') }}"  required></textarea><br><br>
 
         <label>Tanda Tangan:</label><br>
-        <input type="file" name="signature_path"><br><br>
+<input type="file" name="signature_path" id="signature" accept="image/*" onchange="previewSignature(event)">
+<br><br>
+<img id="signaturePreview" src="#" alt="Preview Tanda Tangan" style="display:none; width:150px; margin-top:10px;">
+
 
         <button type="submit">Simpan</button>
     </form>
@@ -165,5 +168,14 @@
     phoneInput.addEventListener('paste', function (e) {
         e.preventDefault(); // mencegah agaar tidak si hapus +62 nya
     });
+    function previewSignature(event) {
+    var reader = new FileReader();
+    reader.onload = function(){
+        var output = document.getElementById('signaturePreview');
+        output.src = reader.result;
+        output.style.display = 'block';
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
 </script>
 
