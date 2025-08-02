@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\ExportDataController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\UserController;
@@ -13,4 +14,7 @@ Route::prefix('mobile')->group(function () {
 
 Route::prefix('web')->group(function () {
   Route::get('/users', [UserController::class, 'index']);
+  Route::get('/exports/guests', [ExportDataController::class, 'export']);
 });
+
+

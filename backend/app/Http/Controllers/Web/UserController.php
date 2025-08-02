@@ -26,4 +26,6 @@ class UserController extends Controller
 
         return ApiFormatter::sendSuccess("Users retrieved successfully", UserResource::collection($users));
     }
+
+    
 }
