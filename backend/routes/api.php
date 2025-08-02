@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\UserController;
+use App\Http\Controllers\Api\GuestAlumniController;
 
 Route::prefix('mobile')->group(function () {
   require __DIR__ . '/mobile.php';
@@ -14,3 +15,5 @@ Route::prefix('mobile')->group(function () {
 Route::prefix('web')->group(function () {
   Route::get('/users', [UserController::class, 'index']);
 });
+Route::get('/guest-alumni', [GuestAlumniController::class, 'index']);
+Route::post('/guest-alumni', [GuestAlumniController::class, 'store']);
