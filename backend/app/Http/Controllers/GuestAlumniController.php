@@ -28,15 +28,21 @@ class GuestAlumniController extends Controller
      */
     public function store(Request $request)
     {
+
+
         $data = $request->validate([
             'name' => 'required',
             'graduation_year' => 'required',
             'major' => 'required',
             'phone' => 'required',
-            'email' => 'required',
+            'email' => 'nullable|email',
             'purpose' => 'required',
             'signature_path' => 'nullable|image', // boleh kosong
         ]);
+
+            $phone = $data['phone'];
+            $phone = preg_replace('/^\+?62+/', '', $phone); // buang +62 di depan jika ada
+            $data['phone'] = '+62' . $phone;
 
         if ($request->hasFile('signature_path')) {
             $filename = time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
