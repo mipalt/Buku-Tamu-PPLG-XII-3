@@ -15,17 +15,6 @@ class GuestAlumniController extends Controller
         return view('guest_alumni.guest');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
 
@@ -34,7 +23,7 @@ class GuestAlumniController extends Controller
             'name' => 'required',
             'graduation_year' => 'required',
             'major' => 'required',
-            'phone' => 'required',
+            'phone' => 'required|min:10|max:14',
             'email' => 'nullable|email',
             'purpose' => 'required',
             'signature_path' => 'nullable|image', // boleh kosong
@@ -53,37 +42,5 @@ class GuestAlumniController extends Controller
         GuestAlumni::create($data);
 
         return redirect()->back()->with('success', 'Berhasil disimpan!');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

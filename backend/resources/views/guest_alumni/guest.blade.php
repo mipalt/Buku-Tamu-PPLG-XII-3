@@ -149,21 +149,21 @@
             phoneInput.value = '+62';
         }
 
-        // Pindahkan kursor ke akhir input
+        // memindahkan cursor ke samping input
         setTimeout(() => {
             phoneInput.setSelectionRange(phoneInput.value.length, phoneInput.value.length);
         }, 0);
     });
 
     phoneInput.addEventListener('keydown', function (e) {
-        // Cegah menghapus "+62"
+        // mencegah agaar tidak si hapus +62 nya
         if ((phoneInput.selectionStart <= 3) && (e.key === "Backspace" || e.key === "Delete")) {
             e.preventDefault();
         }
     });
 
     phoneInput.addEventListener('paste', function (e) {
-        e.preventDefault(); // Cegah paste yang bisa menghapus +62
+        e.preventDefault(); // mencegah agaar tidak si hapus +62 nya
     });
 </script>
 
