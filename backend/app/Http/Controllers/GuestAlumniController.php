@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Alumni;
+use App\Models\GuestAlumni;
 
 class GuestAlumniController extends Controller
 {
@@ -12,7 +12,7 @@ class GuestAlumniController extends Controller
      */
     public function index()
     {
-        return view ('guest_alumni.guest');
+        return view('guest_alumni.guest');
     }
 
     /**
@@ -28,7 +28,25 @@ class GuestAlumniController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required',
+            'graduation_year' => 'required',
+            'major' => 'required',
+            'phone' => 'required',
+            'email' => 'required',
+            'purpose' => 'required',
+            'signature_path' => 'nullable|image', // boleh kosong
+        ]);
+
+        if ($request->hasFile('signature_path')) {
+            $filename = time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
+            $request->file('signature_path')->move(public_path('ttd_alumni'), $filename);
+            $data['signature_path'] = 'ttd_alumni/' . $filename;
+        }
+
+        GuestAlumni::create($data);
+
+        return redirect()->back()->with('success', 'Berhasil disimpan!');
     }
 
     /**

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('phone', 20);
             $table->string('email', 100)->nullable(); // opsional
             $table->text('purpose');
-            $table->string('signature_path', 150);
+            $table->string('signature_path')->nullable();
             $table->timestamp('created_at')->useCurrent();
         });
     }
