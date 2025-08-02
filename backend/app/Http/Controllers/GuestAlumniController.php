@@ -12,7 +12,7 @@ class GuestAlumniController extends Controller
      */
     public function index()
     {
-        //
+        return view ('guest_alumni.guest');
     }
 
     /**
