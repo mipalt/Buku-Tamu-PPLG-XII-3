@@ -17,3 +17,5 @@ Route::prefix('web')->group(function () {
 });
 Route::get('/guest-alumni', [GuestAlumniController::class, 'index']);
 Route::post('/guest-alumni', [GuestAlumniController::class, 'store']);
+Route::put('/guest-alumni/{id}', [GuestAlumniController::class, 'update']);
+Route::delete('/guest-alumni/{id}', [GuestAlumniController::class, 'destroy']);
