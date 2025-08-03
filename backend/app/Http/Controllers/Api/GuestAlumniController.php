@@ -25,6 +25,7 @@ class GuestAlumniController extends Controller
             'signature_path' => 'nullable|image',
         ]);
 
+
         if ($request->hasFile('signature_path')) {
             $filename = time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
             $request->file('signature_path')->move(public_path('ttd_alumni'), $filename);
@@ -39,47 +40,62 @@ class GuestAlumniController extends Controller
         ], 201);
     }
     public function update(Request $request, $id)
-{
-    $alumni = GuestAlumni::findOrFail($id);
+    {
+        $alumni = GuestAlumni::find($id);
 
-    $data = $request->validate([
-        'name' => 'required',
-        'graduation_year' => 'required',
-        'major' => 'required',
-        'phone' => 'required',
-        'email' => 'required|email',
-        'purpose' => 'required',
-        'signature_path' => 'nullable|image',
-    ]);
+        if (!$alumni) {
+            return response()->json(['message' => 'data tidak ditemukan'], 404);
+        }
 
-    if ($request->hasFile('signature_path')) {
+        $data = $request->validate([ //ini validasi data
+            'name' => 'sometimes|required',
+            'graduation_year' => 'sometimes|required',
+            'major' => 'sometimes|required',
+            'phone' => 'sometimes|required',
+            'email' => 'sometimes|required|email',
+            'purpose' => 'sometimes|required',
+            'signature_path' => 'nullable|image',
+        ]);
+
+        if ($request->hasFile('signature_path')) {
+            try {
+                if ($alumni->signature_path && file_exists(public_path($alumni->signature_path))) {
+                    unlink(public_path($alumni->signature_path));
+                }
+
+                $filename = time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
+                $request->file('signature_path')->move(public_path('ttd_alumni'), $filename);
+                $data['signature_path'] = 'ttd_alumni/' . $filename;
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Error saat upload file',
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
+        }
+
+        $alumni->update($data);
+
+        return response()->json([
+            'message' => 'Data berhasil diperbarui',
+            'data' => $alumni->fresh() // ini akan ambil ulang data dari database
+        ], 200);
+    }
+
+    public function destroy($id)
+    {
+        $alumni = GuestAlumni::find($id);
+        if (!$alumni) {
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
+        }
+
         if ($alumni->signature_path && file_exists(public_path($alumni->signature_path))) {
             unlink(public_path($alumni->signature_path));
         }
-        $filename = time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
-        $request->file('signature_path')->move(public_path('ttd_alumni'), $filename);
-        $data['signature_path'] = 'ttd_alumni/' . $filename;
+        $alumni->delete();
+
+        return response()->json([
+            'message' => 'Data berhasil dihapus'
+        ], 200);
     }
-
-    $alumni->update($data);
-
-    return response()->json([
-        'message' => 'Data berhasil diperbarui',
-        'data' => $alumni
-    ], 200);
-}
-
-public function destroy($id)
-{
-    $alumni = GuestAlumni::findOrFail($id);
-    if ($alumni->signature_path && file_exists(public_path($alumni->signature_path))) {
-        unlink(public_path($alumni->signature_path));
-    }
-
-    $alumni->delete();
-
-    return response()->json([
-        'message' => 'Data berhasil dihapus'
-    ], 200);
-}
 }
