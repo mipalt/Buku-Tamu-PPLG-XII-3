@@ -1,7 +1,0 @@
-# Ignore SQLite databases
-*.sqlite
-database/*.sqlite
-
-# Ignore all uploaded files in storage
-storage/app/uploads/*
-!storage/app/uploads/.gitignore
