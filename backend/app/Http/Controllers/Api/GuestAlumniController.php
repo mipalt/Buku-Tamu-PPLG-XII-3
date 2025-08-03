@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\GuestAlumni;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+
 
 class GuestAlumniController extends Controller
 {
@@ -27,9 +30,13 @@ class GuestAlumniController extends Controller
 
 
         if ($request->hasFile('signature_path')) {
-            $filename = time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
-            $request->file('signature_path')->move(public_path('ttd_alumni'), $filename);
-            $data['signature_path'] = 'ttd_alumni/' . $filename;
+            $originalName = pathinfo($request->file('signature_path')->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeName = Str::slug($originalName);
+            $filename = $safeName . time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
+
+            $path = $request->file('signature_path')->storeAs('/uploads/alumni_signature', $filename);
+            
+            $data['signature_path'] = 'uploads/alumni_signature/' . $filename;
         }
 
         $alumni = GuestAlumni::create($data);
