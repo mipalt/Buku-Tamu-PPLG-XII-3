@@ -25,7 +25,7 @@ class GuestAlumniController extends Controller
             'phone' => 'required',
             'email' => 'required|email',
             'purpose' => 'required',
-            'signature_path' => 'nullable|image',
+            'signature_path' => 'max:2048',
         ]);
 
 
@@ -34,8 +34,8 @@ class GuestAlumniController extends Controller
             $safeName = Str::slug($originalName);
             $filename = $safeName . time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
 
-            $path = $request->file('signature_path')->storeAs('/uploads/alumni_signature', $filename);
-            
+            $path = $request->file('signature_path')->storeAs('uploads/alumni_signature', $filename, 'public');
+
             $data['signature_path'] = 'uploads/alumni_signature/' . $filename;
         }
 
