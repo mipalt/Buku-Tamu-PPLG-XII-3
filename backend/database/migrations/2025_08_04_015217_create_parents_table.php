@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('student_name', 100);
             $table->string('rayon',10);
             $table->string('address',150);
-            $table->integer('phone',20);
+            $table->string('phone',20);
             $table->string('email',100)->nullable();
             $table->text('purpose');
             $table->string('signature_path');
