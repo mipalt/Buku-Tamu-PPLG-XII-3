@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\GuestAlumni;
 use Illuminate\Support\Str;
-use App\Services\ImageUploadService;
+use App\Service\ImageUploadService;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -30,7 +30,7 @@ class GuestAlumniController extends Controller
         ]);
 
         if ($request->hasFile('signature_path')) {
-            $uploadedPath = $imageUploadService->upload($request->file('signature_path'));
+            $uploadedPath = $imageUploadService->upload($request->file('signature_path'), 'guest-alumni');
             $data['signature_path'] = $uploadedPath;
         }
 
@@ -42,7 +42,8 @@ class GuestAlumniController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, ImageUploadService $imageUploadService, $id)
+
     {
         $alumni = GuestAlumni::find($id);
 
@@ -57,24 +58,12 @@ class GuestAlumniController extends Controller
             'phone' => 'sometimes|required',
             'email' => 'sometimes|required|email',
             'purpose' => 'sometimes|required',
-            'signature_path' => 'nullable|image',
+            'signature_path' => 'sometimes|required|file|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         if ($request->hasFile('signature_path')) {
-            try {
-                if ($alumni->signature_path && file_exists(public_path($alumni->signature_path))) {
-                    unlink(public_path($alumni->signature_path));
-                }
-
-                $filename = time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
-                $request->file('signature_path')->move(public_path('ttd_alumni'), $filename);
-                $data['signature_path'] = 'ttd_alumni/' . $filename;
-            } catch (\Exception $e) {
-                return response()->json([
-                    'message' => 'Error saat upload file',
-                    'error' => $e->getMessage(),
-                ], 500);
-            }
+            $uploadedPath = $imageUploadService->upload($request->file('signature_path'), 'guest-alumni');
+            $data['signature_path'] = $uploadedPath;
         }
 
         $alumni->update($data);
