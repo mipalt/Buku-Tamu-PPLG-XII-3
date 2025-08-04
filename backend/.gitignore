@@ -22,3 +22,15 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Ignore SQLite database
+*.sqlite
+database/*.sqlite
+
+# Ignore uploaded files in public storage
+public/storage/*
+!public/storage/.gitignore
+
+# Ignore uploaded files in storage/app/public
+storage/app/public/uploads/*
+!storage/app/public/uploads/.gitignore
