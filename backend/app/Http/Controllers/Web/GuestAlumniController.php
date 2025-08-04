@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 use App\Service\ImageUploadService;
 use Illuminate\Support\Facades\Storage;
 
-
 class GuestAlumniController extends Controller
 {
     public function index()
@@ -74,15 +73,16 @@ class GuestAlumniController extends Controller
         ], 200);
     }
 
-    public function destroy($id)
+    public function destroy($id, ImageUploadService $imageUploadService)
     {
         $alumni = GuestAlumni::find($id);
+
         if (!$alumni) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
-        if ($alumni->signature_path && Storage::exists($alumni->signature_path)) {
-            Storage::delete($alumni->signature_path);
+        if ($alumni->signature_path) {
+            $imageUploadService->delete(($alumni->signature_path), 'guest-alumni');
         }
 
         $alumni->delete();
