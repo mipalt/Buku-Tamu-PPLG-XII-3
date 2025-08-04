@@ -59,10 +59,42 @@ class ParentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
+public function update(Request $request, string $id)
+{
+    $parent = Parents::findOrFail($id);
+
+    $data = $request->validate([
+        'name' => 'sometimes|string',
+        'student_name' => 'sometimes|string',
+        'rayon' => 'sometimes|string',
+        'address' => 'sometimes|string',
+        'phone' => 'sometimes|string|max:20',
+        'email' => 'nullable|email|unique:parents,email,' . $id,
+        'purpose' => 'sometimes|string',
+        'signature_path' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    if ($request->hasFile('signature_path')) {
+        if ($parent->signature_path && file_exists(public_path($parent->signature_path))) {
+            unlink(public_path($parent->signature_path));
+        }
+
+        $file = $request->file('signature_path');
+        $filename = uniqid('signature_') . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('uploads/parent', $filename, 'public');
+        $data['signature_path'] = 'storage/' . $path;
     }
+
+    // Update hanya field yang dikirim
+    $parent->update($data);
+
+    return response()->json([
+        'message' => 'Data berhasil diperbarui',
+        'data' => $parent
+    ]);
+}
+
+
 
     /**
      * Remove the specified resource from storage.
