@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\GuestAlumni;
 use Illuminate\Support\Str;
+use App\Services\ImageUploadService;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -16,27 +17,21 @@ class GuestAlumniController extends Controller
         return response()->json(GuestAlumni::all());
     }
 
-    public function store(Request $request)
+    public function store(Request $request, ImageUploadService $imageUploadService)
     {
         $data = $request->validate([
             'name' => 'required',
             'graduation_year' => 'required',
             'major' => 'required',
             'phone' => 'required',
-            'email' => 'required|email',
+            'email' => 'nullable|email',
             'purpose' => 'required',
-            'signature_path' => 'max:2048',
+            'signature_path' => 'required|file|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-
         if ($request->hasFile('signature_path')) {
-            $originalName = pathinfo($request->file('signature_path')->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeName = Str::slug($originalName);
-            $filename = $safeName . time() . '.' . $request->file('signature_path')->getClientOriginalExtension();
-
-            $path = $request->file('signature_path')->storeAs('app/uploads/alumni_signature', $filename, 'public');
-            
-            $data['signature_path'] = 'app/uploads/alumni_signature/' . $filename;
+            $uploadedPath = $imageUploadService->upload($request->file('signature_path'));
+            $data['signature_path'] = $uploadedPath;
         }
 
         $alumni = GuestAlumni::create($data);
@@ -46,6 +41,7 @@ class GuestAlumniController extends Controller
             'data' => $alumni
         ], 201);
     }
+
     public function update(Request $request, $id)
     {
         $alumni = GuestAlumni::find($id);
@@ -96,9 +92,10 @@ class GuestAlumniController extends Controller
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
 
-        if ($alumni->signature_path && file_exists(public_path($alumni->signature_path))) {
-            unlink(public_path($alumni->signature_path));
+        if ($alumni->signature_path && Storage::exists($alumni->signature_path)) {
+            Storage::delete($alumni->signature_path);
         }
+
         $alumni->delete();
 
         return response()->json([
