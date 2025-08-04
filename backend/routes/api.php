@@ -15,6 +15,5 @@ Route::prefix('mobile')->group(function () {
 Route::prefix('web')->group(function () {
   Route::get('/users', [UserController::class, 'index']);
 });
-
-Route::get('/parents', [ParentController::class, 'index']);         // GET all parents
-Route::post('/parents', [ParentController::class, 'store']);   
+   
+Route::apiResource('parents', ParentController::class);
