@@ -15,8 +15,7 @@ Route::prefix('mobile')->group(function () {
 Route::prefix('web')->group(function () {
   // contoh dari mipal
   Route::get('/users', [UserController::class, 'index']);
-
-  // guest companies api
-  Route::get('/companies', [GuestCompanyController::class, 'index']);
-  Route::post('/companies', [GuestCompanyController::class, 'store']);
 });
+
+// guest companies api
+Route::apiResource('guest-companies', GuestCompanyController::class);
