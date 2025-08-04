@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Helpers\ApiFormatter;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\GuestAlumni;
@@ -35,11 +36,20 @@ class GuestAlumniController extends Controller
 
         $alumni = GuestAlumni::create($data);
 
-        return response()->json([
-            'message' => 'Data berhasil disimpan',
-            'data' => $alumni
-        ], 201);
+        return ApiFormatter::sendSuccess('Data berhasil disimpan', $alumni);
     }
+
+    public function show($id)
+    {
+        $alumni = GuestAlumni::find($id);
+
+        if (!$alumni) {
+            return ApiFormatter::sendNotFound('Data tidak ada');
+        }
+
+        return ApiFormatter::sendSuccess('Data berhasil diambil', $alumni);
+    }
+
 
     public function update(Request $request, ImageUploadService $imageUploadService, $id)
 
@@ -78,7 +88,7 @@ class GuestAlumniController extends Controller
         $alumni = GuestAlumni::find($id);
 
         if (!$alumni) {
-            return response()->json(['message' => 'Data tidak ditemukan'], 404);
+            return  ApiFormatter::sendNotFound('Data tidak ditemukan');
         }
 
         if ($alumni->signature_path) {
@@ -87,8 +97,6 @@ class GuestAlumniController extends Controller
 
         $alumni->delete();
 
-        return response()->json([
-            'message' => 'Data berhasil dihapus'
-        ], 200);
+        return ApiFormatter::sendSuccess('Data berhasil dihapus');
     }
 }
