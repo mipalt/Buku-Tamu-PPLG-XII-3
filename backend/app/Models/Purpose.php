@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Purpose extends Model
 {
     protected $fillable = [
-        'name',
+        'purpose',
         'visitor_id',
         'guest_type'
     ];
@@ -18,9 +18,9 @@ class Purpose extends Model
     // }
 
     // di model
-    // public function purposes()
-    // {
-    //     return $this->morphMany(Purpose::class, 'visitor', 'guest_type', 'visitor_id');
-    // }
+    public function purposes()
+    {
+        return $this->morphMany(Purpose::class, 'visitor', 'guest_type', 'visitor_id');
+    }
 
 }
