@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email', 100)->nullable();
             $table->text('purpose', 100);
             $table->string('signature_path', 255);
-            $table->timestamp('create_at');
+            $table->timestamps();
         });
     }
 

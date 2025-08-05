@@ -15,8 +15,7 @@ class Visitor extends Model
         'email',
         'purpose',
         'signature_path',
-        'create_at'
+        'created_at',
+        'updated_at'
     ];
-
-    public $timetamps = false;
 }

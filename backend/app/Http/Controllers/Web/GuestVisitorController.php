@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\web;
 
+use App\Helpers\ApiFormatter;
 use App\Http\Controllers\Controller;
 use App\Models\Visitor;
 use App\Services\ImageUploadService;
@@ -12,18 +13,30 @@ class GuestVisitorController extends Controller
     //
     public function index()
     {
-        return response()->json(Visitor::all(), 200);
+        $visitors = Visitor::all();
+
+        if ($visitors->isEmpty()) {
+            return ApiFormatter::sendNotFound('No visitors found');
+        }
+
+        return ApiFormatter::sendSuccess('Visitors retrieved successfully', $visitors);
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function show($id)
     {
         $visitor = Visitor::find($id);
 
         if (!$visitor) {
-            return response()->json(['message' => 'Visitor not found'], 404);
+            return ApiFormatter::sendNotFound('Visitor not found');
         }
 
-        return response()->json($visitor, 200);
+        return ApiFormatter::sendSuccess('Visitor retrieved successfully', $visitor);
     }
     public function store(Request $request)
     {
@@ -42,7 +55,7 @@ class GuestVisitorController extends Controller
 
         $visitor = Visitor::create($validated);
 
-        return response()->json($visitor, 201);
+        return ApiFormatter::sendSuccess('Data successfully created!', $visitor);
     }
      public function update(Request $request, $id)
     {
@@ -71,7 +84,7 @@ class GuestVisitorController extends Controller
 
         $visitor->update($validated);
 
-        return response()->json($visitor, 200);
+        return ApiFormatter::sendSuccess('Data successfully updated!', $visitor);
     }
     public function destroy($id)
     {
@@ -85,6 +98,6 @@ class GuestVisitorController extends Controller
 
         $visitor->delete();
 
-        return response()->json(['message' => 'Visitor deleted'], 200);
+        return ApiFormatter::sendSuccess('Data successfully deleted!');
     }
 }
