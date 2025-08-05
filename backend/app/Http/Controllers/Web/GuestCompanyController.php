@@ -7,7 +7,7 @@ use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\GuestCompany;
-use App\Service\ImageUploadService;
+use App\Services\ImageUploadService;
 
 class GuestCompanyController extends Controller
 {
@@ -124,27 +124,27 @@ class GuestCompanyController extends Controller
     }
 
    public function destroy($id)
-{
-    try {
-        $company = GuestCompany::find($id);
+    {
+        try {
+            $company = GuestCompany::find($id);
 
-        if (!$company) {
-            return ApiFormatter::sendNotFound('Guest company not found');
+            if (!$company) {
+                return ApiFormatter::sendNotFound('Guest company not found');
+            }
+
+            // Hapus file signature jika ada
+            if ($company->signature_path && file_exists(public_path($company->signature_path))) {
+                unlink(public_path($company->signature_path));
+            }
+
+            $company->delete();
+
+            return ApiFormatter::sendSuccess('Guest company deleted successfully');
+        } catch (\Exception $e) {
+            return ApiFormatter::sendServerError('Something went wrong', [
+                'error' => $e->getMessage()
+            ]);
         }
-
-        // Hapus file signature jika ada
-        if ($company->signature_path && file_exists(public_path($company->signature_path))) {
-            unlink(public_path($company->signature_path));
-        }
-
-        $company->delete();
-
-        return ApiFormatter::sendSuccess('Guest company deleted successfully');
-    } catch (\Exception $e) {
-        return ApiFormatter::sendServerError('Something went wrong', [
-            'error' => $e->getMessage()
-        ]);
     }
-}
 
 }
