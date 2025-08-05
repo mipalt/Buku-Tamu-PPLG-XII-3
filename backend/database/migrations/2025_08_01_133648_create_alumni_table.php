@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->integer('graduation_year');
             $table->string('major', 4);
-            $table->string('phone', 20);
+            $table->string('phone', 20)->unique();
             $table->string('email', 100)->unique()->nullable();
             $table->text('purpose');
             $table->string('signature_path');
