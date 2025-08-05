@@ -14,6 +14,9 @@ class GuestAlumniController extends Controller
 {
     public function index()
     {
+        if (GuestAlumni::count() == 0) {
+            return ApiFormatter::sendNotFound('Data Not Found');
+        }
         return ApiFormatter::sendSuccess('Data Successfully', GuestAlumni::all());
     }
 
@@ -29,10 +32,6 @@ class GuestAlumniController extends Controller
             'signature_path' => 'required|file|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $data = GuestAlumni::where('email', $request->email)->orWhere('phone', $request->phone)->first(); {
-            return ApiFormatter::sendValidationError('email or phone number is already registered');
-        }
-
         if ($request->hasFile('signature_path')) {
             $uploadedPath = $imageUploadService->upload($request->file('signature_path'), 'guest-alumni');
             $data['signature_path'] = $uploadedPath;
@@ -42,6 +41,7 @@ class GuestAlumniController extends Controller
 
         return ApiFormatter::sendSuccess('Data berhasil disimpan', $alumni);
     }
+
 
     public function show($id)
     {
