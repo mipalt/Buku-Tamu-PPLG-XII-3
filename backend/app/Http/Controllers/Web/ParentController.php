@@ -61,7 +61,6 @@ class ParentController extends Controller
      */
 public function update(Request $request, string $id)
 {
-    //  \Log::info('ISI REQUEST:', $request->all());
     $parent = Parents::findOrFail($id);
 
     $data = $request->validate([
@@ -76,8 +75,11 @@ public function update(Request $request, string $id)
     ]);
 
     if ($request->hasFile('signature_path')) {
-        if ($parent->signature_path && file_exists(public_path($parent->signature_path))) {
-            unlink(public_path($parent->signature_path));
+        if ($parent->signature_path) {
+            $path = str_replace('storage/', '', $parent->signature_path);
+            if (\Storage::disk('public')->exists($path)) {
+                \Storage::disk('public')->delete($path);
+            }
         }
 
         $file = $request->file('signature_path');
@@ -85,6 +87,7 @@ public function update(Request $request, string $id)
         $path = $file->storeAs('uploads/parent', $filename, 'public');
         $data['signature_path'] = 'storage/' . $path;
     }
+
     $parent->update($data);
 
     return response()->json([
@@ -92,6 +95,8 @@ public function update(Request $request, string $id)
         'data' => $parent
     ]);
 }
+
+
 
 
 
