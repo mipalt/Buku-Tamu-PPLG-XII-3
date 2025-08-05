@@ -14,7 +14,7 @@ class GuestAlumniController extends Controller
 {
     public function index()
     {
-        return response()->json(GuestAlumni::all());
+        return ApiFormatter::sendSuccess('Data Successfully', GuestAlumni::all());
     }
 
     public function store(Request $request, ImageUploadService $imageUploadService)
@@ -23,11 +23,15 @@ class GuestAlumniController extends Controller
             'name' => 'required',
             'graduation_year' => 'required',
             'major' => 'required',
-            'phone' => 'required',
-            'email' => 'nullable|email',
+            'email' => 'required|email|unique:guest_alumni,email',
+            'phone' => 'required|unique:guest_alumni,phone',
             'purpose' => 'required',
             'signature_path' => 'required|file|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        $data = GuestAlumni::where('email', $request->email)->orWhere('phone', $request->phone)->first(); {
+            return ApiFormatter::sendValidationError('email or phone number is already registered');
+        }
 
         if ($request->hasFile('signature_path')) {
             $uploadedPath = $imageUploadService->upload($request->file('signature_path'), 'guest-alumni');
@@ -44,7 +48,7 @@ class GuestAlumniController extends Controller
         $alumni = GuestAlumni::find($id);
 
         if (!$alumni) {
-            return ApiFormatter::sendNotFound('Data tidak ada');
+            return ApiFormatter::sendNotFound('Data Not Found');
         }
 
         return ApiFormatter::sendSuccess('Data berhasil diambil', $alumni);
@@ -57,7 +61,7 @@ class GuestAlumniController extends Controller
         $alumni = GuestAlumni::find($id);
 
         if (!$alumni) {
-            return response()->json(['message' => 'data tidak ditemukan'], 404);
+            return ApiFormatter::sendNotFound('Data Not Found');
         }
 
         $data = $request->validate([ //ini validasi data
@@ -88,7 +92,7 @@ class GuestAlumniController extends Controller
         $alumni = GuestAlumni::find($id);
 
         if (!$alumni) {
-            return  ApiFormatter::sendNotFound('Data tidak ditemukan');
+            return  ApiFormatter::sendNotFound('Data Not Found');
         }
 
         if ($alumni->signature_path) {
@@ -97,6 +101,6 @@ class GuestAlumniController extends Controller
 
         $alumni->delete();
 
-        return ApiFormatter::sendSuccess('Data berhasil dihapus');
+        return ApiFormatter::sendSuccess('Data has been deleted');
     }
 }
