@@ -1,14 +1,19 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "../pages/login";
+import Login from "../pages/auth/login";
+import NotFoundPage from "../pages/not-found/NotFound";
 
 const AppRouter = () => {
-  return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Navigate to="/login" />} />
-      <Route path="*" element={<h1 className="flex item-center justify-center">404 - Page Not Found</h1>} />
-    </Routes>
-  );
+    return (
+        //ini untuk atur routes nya 
+        <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Navigate to="/login" />} />
+
+
+            {/* component yang akan di render ketika tidak ada route yang cocok */}
+            <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+    );
 };
 
 export default AppRouter;
