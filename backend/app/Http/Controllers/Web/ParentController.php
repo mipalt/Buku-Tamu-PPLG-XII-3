@@ -61,6 +61,7 @@ class ParentController extends Controller
      */
 public function update(Request $request, string $id)
 {
+    //  \Log::info('ISI REQUEST:', $request->all());
     $parent = Parents::findOrFail($id);
 
     $data = $request->validate([
@@ -84,8 +85,6 @@ public function update(Request $request, string $id)
         $path = $file->storeAs('uploads/parent', $filename, 'public');
         $data['signature_path'] = 'storage/' . $path;
     }
-
-    // Update hanya field yang dikirim
     $parent->update($data);
 
     return response()->json([
@@ -99,8 +98,19 @@ public function update(Request $request, string $id)
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        //
+public function destroy(string $id)
+{
+    $parent = Parents::findOrFail($id);
+
+    if ($parent->signature_path && file_exists(public_path($parent->signature_path))) {
+        unlink(public_path($parent->signature_path));
     }
+
+    $parent->delete();
+
+    return response()->json([
+        'message' => 'Data berhasil dihapus'
+    ]);
+}
+
 }
