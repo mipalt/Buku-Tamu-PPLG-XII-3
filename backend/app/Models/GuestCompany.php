@@ -16,9 +16,13 @@ class GuestCompany extends Model
         'company_name',
         'phone',
         'email',
-        'purpose',
         'signature_path',
     ];
     
+    public function purposes()
+    {
+        return $this->morphOne(Purpose::class, 'visitor', 'guest_type', 'visitor_id');
+    }
+
 }
 

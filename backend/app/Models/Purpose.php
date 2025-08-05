@@ -7,10 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Purpose extends Model
 {
     protected $fillable = [
-        'name',
+        'purpose',
         'visitor_id',
         'guest_type'
     ];
+
+    public function company()
+    {
+        return $this->morphTo(__FUNCTION__, 'guest_type', 'visitor_id');
+    }
 
     // public function visitor()
     // {

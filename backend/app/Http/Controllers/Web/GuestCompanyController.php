@@ -3,19 +3,20 @@
 namespace App\Http\Controllers\Web;
 
 use App\Helpers\ApiFormatter;
-use Illuminate\Validation\ValidationException;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\GuestCompany;
+use App\Models\Purpose;
 use App\Services\ImageUploadService;
+use Illuminate\Support\Facades\DB;
 
 class GuestCompanyController extends Controller
 {
     public function index()
     {
-        $companies = GuestCompany::all();
+        $companies = GuestCompany::with('purposes')->get();
 
-        if (!$companies || $companies->isEmpty()) {
+        if ($companies->isEmpty()) {
             return ApiFormatter::sendNotFound('Guest company not found');
         }
 
@@ -24,7 +25,7 @@ class GuestCompanyController extends Controller
 
     public function show($id)
     {
-        $company = GuestCompany::find($id);
+        $company = GuestCompany::with('purposes')->find($id);
 
         if (!$company) {
             return ApiFormatter::sendNotFound('Guest company not found');
@@ -35,116 +36,116 @@ class GuestCompanyController extends Controller
 
     public function store(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:100',
-                'company_name' => 'required|string|max:100',
-                'phone' => 'required|string|max:20',
-                'email' => 'nullable|email|max:100',
-                'purpose' => 'required|string|max:1000',
-                'signature_path' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-            ]);
-        } catch (\Exception $e) {
-            return ApiFormatter::sendValidationError('Validation failed', $e->errors());
-        }
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'company_name' => 'required|string|max:100',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:100',
+            'purpose' => 'required|string|max:1000',
+            'signature_path' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        DB::beginTransaction();
 
         try {
-            $signaturePath = null;
-
-            if ($request->hasFile('signature_path')) {
-                $signaturePath = ImageUploadService::upload($request->file('signature_path'), 'signature_company');
-            }
+            $signaturePath = ImageUploadService::upload($request->file('signature_path'), 'signature_company');
 
             $company = GuestCompany::create([
                 'name' => $validated['name'],
                 'company_name' => $validated['company_name'],
                 'phone' => $validated['phone'],
                 'email' => $validated['email'] ?? null,
-                'purpose' => $validated['purpose'],
                 'signature_path' => $signaturePath,
                 'created_at' => now(),
             ]);
 
-            return ApiFormatter::sendSuccess('Guest company saved successfully', $company);
+            $company->purposes()->create([
+                'purpose' => $validated['purpose'],
+                'visitor_id' => $company->id,
+                'guest_type' => GuestCompany::class,
+                'created_at' => now(),
+            ]);
+
+            DB::commit();
+            return ApiFormatter::sendSuccess('Guest company saved successfully', $company->load('purposes'));
 
         } catch (\Exception $e) {
-            return ApiFormatter::sendServerError('Something went wrong', [
-                'error' => $e->getMessage()
-            ]);
+            DB::rollBack();
+            return ApiFormatter::sendServerError('Something went wrong', ['error' => $e->getMessage()]);
         }
     }
 
     public function update(Request $request, $id)
     {
-        try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:100',
-                'company_name' => 'required|string|max:100',
-                'phone' => 'required|string|max:20',
-                'email' => 'nullable|email|max:100',
-                'purpose' => 'required|string|max:1000',
-                'signature_path' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            ]);
-        } catch (\Exception $e) {
-            return ApiFormatter::sendValidationError('Validation failed', $e->errors());
-        }
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'company_name' => 'required|string|max:100',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:100',
+            'purpose' => 'required|string|max:1000',
+            'signature_path' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        DB::beginTransaction();
 
         try {
             $company = GuestCompany::find($id);
-
             if (!$company) {
                 return ApiFormatter::sendNotFound('Guest company not found');
             }
 
+            // Ganti signature jika ada
             if ($request->hasFile('signature_path')) {
-                // Opsional: hapus file lama jika perlu
                 if ($company->signature_path && file_exists(public_path($company->signature_path))) {
                     unlink(public_path($company->signature_path));
                 }
-
-                $signaturePath = ImageUploadService::upload($request->file('signature_path'), 'signature_company');
-                $company->signature_path = $signaturePath;
+                $company->signature_path = ImageUploadService::upload($request->file('signature_path'), 'signature_company');
             }
 
-            $company->name = $validated['name'];
-            $company->company_name = $validated['company_name'];
-            $company->phone = $validated['phone'];
-            $company->email = $validated['email'] ?? null;
-            $company->purpose = $validated['purpose'];
-            $company->updated_at = now();
-
-            $company->save();
-
-            return ApiFormatter::sendSuccess('Guest company updated successfully', $company);
-        } catch (\Exception $e) {
-            return ApiFormatter::sendServerError('Something went wrong', [
-                'error' => $e->getMessage()
+            $company->update([
+                'name' => $validated['name'],
+                'company_name' => $validated['company_name'],
+                'phone' => $validated['phone'],
+                'email' => $validated['email'] ?? null,
+                'updated_at' => now(),
             ]);
+
+            // Update atau buat purpose (asumsikan satu purpose per company)
+            $company->purposes()->updateOrCreate(
+                ['guest_type' => GuestCompany::class, 'visitor_id' => $company->id],
+                ['purpose' => $validated['purpose']]
+            );
+
+            DB::commit();
+            return ApiFormatter::sendSuccess('Guest company updated successfully', $company->load('purposes'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ApiFormatter::sendServerError('Something went wrong', ['error' => $e->getMessage()]);
         }
     }
 
-   public function destroy($id)
+    public function destroy($id)
     {
         try {
-            $company = GuestCompany::find($id);
-
+            $company = GuestCompany::with('purposes')->find($id);
             if (!$company) {
                 return ApiFormatter::sendNotFound('Guest company not found');
             }
 
-            // Hapus file signature jika ada
+            // Hapus file signature
             if ($company->signature_path && file_exists(public_path($company->signature_path))) {
                 unlink(public_path($company->signature_path));
             }
+
+            // Hapus purposes-nya
+            $company->purposes()->delete();
 
             $company->delete();
 
             return ApiFormatter::sendSuccess('Guest company deleted successfully');
         } catch (\Exception $e) {
-            return ApiFormatter::sendServerError('Something went wrong', [
-                'error' => $e->getMessage()
-            ]);
+            return ApiFormatter::sendServerError('Something went wrong', ['error' => $e->getMessage()]);
         }
     }
-
 }
