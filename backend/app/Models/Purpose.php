@@ -18,9 +18,9 @@ class Purpose extends Model
     // }
 
     // di model
-    public function purposes()
-    {
-        return $this->morphMany(Purpose::class, 'visitor', 'guest_type', 'visitor_id');
-    }
+    public function alumni()
+{
+    return $this->morphTo(__FUNCTION__, 'guest_type', 'visitor_id');
+}
 
 }
