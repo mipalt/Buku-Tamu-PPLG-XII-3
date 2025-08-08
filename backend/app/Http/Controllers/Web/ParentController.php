@@ -42,7 +42,7 @@ class ParentController extends Controller
    if ($request->hasFile('signature_path')) {
     $data['signature_path'] = ImageUploadService::upload(
      $request->file('signature_path'),
-     'parent'
+     'guest-parent'
     );
    }
 
@@ -107,7 +107,7 @@ class ParentController extends Controller
 
     $data['signature_path'] = ImageUploadService::upload(
      $request->file('signature_path'),
-     'parent'
+     'guest-parent'
     );
    }
 
