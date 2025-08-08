@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\GuestCompanyController;
+use App\Http\Controllers\web\GuestVisitorController;
 use App\Http\Controllers\Web\ParentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,4 +19,5 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::apiResource('guest-alumni', GuestAlumniController::class);
   Route::apiResource('guest-companies', GuestCompanyController::class);
   Route::apiResource('guest-parents', ParentController::class);
+  Route::apiResource('guest-visitors', GuestVisitorController::class);
 });

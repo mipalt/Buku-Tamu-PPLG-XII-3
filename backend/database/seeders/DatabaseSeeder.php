@@ -18,7 +18,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             GuestAlumniSeeder::class,
             GuestCompanySeeder::class,
-            ParentsTableSeeder::class
+            ParentsTableSeeder::class,
+            VisitorSeeder::class,
         ]);
     }
 }
