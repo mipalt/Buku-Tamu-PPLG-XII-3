@@ -17,7 +17,6 @@ class GuestAlumni extends Model
         'major',
         'phone',
         'email',
-        'purpose',
         'signature_path',
         'created_at',
     ];
