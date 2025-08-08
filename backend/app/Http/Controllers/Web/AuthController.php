@@ -44,8 +44,12 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
-        
-        if ($user && $user->currentAccessToken()) {
+
+        if (!$user) {
+            return ApiFormatter::sendUnauthorized('You must be logged in to perform this action');
+        }
+
+        if ($user->currentAccessToken()) {
             $user->currentAccessToken()->delete();
         }
 
@@ -55,6 +59,10 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
+
+        if (!$user) {
+            return ApiFormatter::sendUnauthorized('Unauthorized access');
+        }
 
         return ApiFormatter::sendSuccess('User data retrieved successfully', new AuthResource($user));
     }
