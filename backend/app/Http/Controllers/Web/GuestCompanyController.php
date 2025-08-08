@@ -6,9 +6,8 @@ use App\Helpers\ApiFormatter;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\GuestCompany;
-use App\Models\Purpose;
-use App\Services\ImageUploadService;
 use Illuminate\Support\Facades\DB;
+use App\Services\ImageUploadService;
 
 class GuestCompanyController extends Controller
 {
@@ -48,6 +47,7 @@ class GuestCompanyController extends Controller
         DB::beginTransaction();
 
         try {
+            // Upload signature pakai ImageUploadService
             $signaturePath = ImageUploadService::upload($request->file('signature_path'), 'signature_company');
 
             $company = GuestCompany::create([
@@ -96,8 +96,8 @@ class GuestCompanyController extends Controller
 
             // Ganti signature jika ada
             if ($request->hasFile('signature_path')) {
-                if ($company->signature_path && file_exists(public_path($company->signature_path))) {
-                    unlink(public_path($company->signature_path));
+                if ($company->signature_path) {
+                    ImageUploadService::delete($company->signature_path);
                 }
                 $company->signature_path = ImageUploadService::upload($request->file('signature_path'), 'signature_company');
             }
@@ -134,8 +134,8 @@ class GuestCompanyController extends Controller
             }
 
             // Hapus file signature
-            if ($company->signature_path && file_exists(public_path($company->signature_path))) {
-                unlink(public_path($company->signature_path));
+            if ($company->signature_path) {
+                ImageUploadService::delete($company->signature_path);
             }
 
             // Hapus purposes-nya
