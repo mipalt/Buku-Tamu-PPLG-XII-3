@@ -50,7 +50,7 @@ class GuestVisitorController extends Controller
             // Upload tanda tangan
             $validated['signature_path'] = ImageUploadService::upload(
                 $request->file('signature_path'),
-                'signatures'
+                'guest-visitor'
             );
 
             // Simpan ke guest_visitors
@@ -84,11 +84,11 @@ class GuestVisitorController extends Controller
     {
 
         $validated = $request->validate([
-            'name'           => 'sometimes|required|string|max:100',
+            'name'           => 'required|string|max:100',
             'institution'    => 'nullable|string|max:100',
-            'phone'          => 'sometimes|required|string|max:20',
+            'phone'          => 'required|string|max:20',
             'email'          => 'nullable|email|max:100',
-            'purpose'        => 'sometimes|required|string',
+            'purpose'        => 'required|string',
             'signature_path' => 'nullable|image|max:2048'
         ]);
 
@@ -105,7 +105,7 @@ class GuestVisitorController extends Controller
                 if ($guestVisitor->signature_path) {
                     ImageUploadService::delete($guestVisitor->signature_path);
                 }
-                $guestVisitor->signature_path = ImageUploadService::upload($request->file('signature_path'), 'signature_company');
+                $guestVisitor->signature_path = ImageUploadService::upload($request->file('signature_path'), 'guest-visitor');
             }
 
             // Update guest_visitors
@@ -117,11 +117,10 @@ class GuestVisitorController extends Controller
                 'updated_at'     => now(),
             ]);
 
-            $guestVisitor->purposes()->updateOrCreate([
+            $guestVisitor->purposes()->updateOrCreate(
                 ['guest_type' => Visitor::class, 'visitor_id' => $guestVisitor->id],
-                ['purpose' => $validated['purpose'] ?? $guestVisitor->purposes->first()->purpose ?? null]
-            ]);
-                
+                ['purpose' => $validated['purpose']]
+            );
 
             DB::commit();
             return ApiFormatter::sendSuccess('Data successfully updated!', $guestVisitor->load('purposes'));
