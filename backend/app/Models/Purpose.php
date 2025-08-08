@@ -17,13 +17,12 @@ class Purpose extends Model
         return $this->morphTo(__FUNCTION__, 'guest_type', 'visitor_id');
     }
 
-    // public function visitor()
-    // {
-    //     return $this->morphTo(__FUNCTION__, 'guest_type', 'visitor_id');
-    // }
-
-    // di model
     public function alumni()
+    {
+        return $this->morphTo(__FUNCTION__, 'guest_type', 'visitor_id');
+    }
+
+    public function parents()
     {
         return $this->morphTo(__FUNCTION__, 'guest_type', 'visitor_id');
     }
