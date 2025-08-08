@@ -76,7 +76,7 @@ class GuestAlumniController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, ImageUploadService $imageUploadService)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
@@ -97,8 +97,8 @@ class GuestAlumniController extends Controller
             }
 
             if ($request->hasFile('signature_path')) {
-                if ($alumni->signature_path && file_exists(public_path($alumni->signature_path))) {
-                    unlink(public_path($alumni->signature_path));
+                if ($alumni->signature_path) {
+                    $imageUploadService->delete(($alumni->signature_path));
                 }
                 $alumni->signature_path = ImageUploadService::upload($request->file('signature_path'), 'guest-alumni');
             }
@@ -136,7 +136,7 @@ class GuestAlumniController extends Controller
             }
 
             if ($alumni->signature_path) {
-                $imageUploadService->delete(($alumni->signature_path), 'guest-alumni');
+                $imageUploadService->delete(($alumni->signature_path));
             }
 
             $alumni->purposes()->delete();
