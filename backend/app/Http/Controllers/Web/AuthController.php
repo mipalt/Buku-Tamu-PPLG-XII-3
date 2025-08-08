@@ -13,17 +13,13 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $valid = Validator::make($request->all(), [
-            'email'     => 'required|email',
-            'password'  => 'required'
-        ], [
-            'email.required'    => 'Email is required',
-            'email.email'       => 'Email must be an email address',
-            'password.required' => 'Password is required'
+        $valid = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        if ($valid->fails()) {
-            return ApiFormatter::sendValidationError('Validation failed', $valid->errors()->toArray());
+        if (!$valid) {
+            return ApiFormatter::sendValidationError('Validation failed');
         }
 
         $credentials = $request->only(['email', 'password']);
@@ -44,7 +40,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
-        
+
         if ($user && $user->currentAccessToken()) {
             $user->currentAccessToken()->delete();
         }
