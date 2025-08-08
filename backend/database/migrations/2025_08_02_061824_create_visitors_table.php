@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('institution', 100)->nullable();
             $table->string('phone', 20);
             $table->string('email', 100)->nullable();
-            $table->text('purpose', 100);
             $table->string('signature_path', 255);
             $table->timestamps();
         });

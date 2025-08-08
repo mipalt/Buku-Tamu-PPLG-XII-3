@@ -23,6 +23,17 @@ class GuestVisitorController extends Controller
         return ApiFormatter::sendSuccess('Visitors retrieved successfully', $visitors);
     }
 
+    public function show($id)
+    {
+        $visitor = Visitor::with('purposes')->find($id);
+
+        if (!$visitor) {
+            return ApiFormatter::sendNotFound('Visitor not found');
+        }
+
+        return ApiFormatter::sendSuccess('Visitor retrieved successfully', $visitor);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -91,8 +102,8 @@ class GuestVisitorController extends Controller
 
             // Update file tanda tangan
             if ($request->hasFile('signature_path')) {
-                if ($guestVisitor->signature_path && file_exists(public_path($guestVisitor->signature_path))) {
-                    unlink(public_path($guestVisitor->signature_path));
+                if ($guestVisitor->signature_path) {
+                    ImageUploadService::delete($guestVisitor->signature_path);
                 }
                 $guestVisitor->signature_path = ImageUploadService::upload($request->file('signature_path'), 'signature_company');
             }
@@ -105,19 +116,6 @@ class GuestVisitorController extends Controller
                 'email'          => $validated['email'] ?? $guestVisitor->email,
                 'updated_at'     => now(),
             ]);
-
-            // Update purpose kalau dikirim
-            // if (isset($validated['purpose'])) {
-            //     if ($guestVisitor->purposes->isNotEmpty()) {
-            //         $guestVisitor->purposes()->update([
-            //             'purpose' => $validated['purpose']
-            //         ]);
-            //     } else {
-            //         $guestVisitor->purposes()->create([
-            //             'purpose' => $validated['purpose']
-            //         ]);
-            //     }
-            // }
 
             $guestVisitor->purposes()->updateOrCreate([
                 ['guest_type' => Visitor::class, 'visitor_id' => $guestVisitor->id],
@@ -142,8 +140,8 @@ class GuestVisitorController extends Controller
             }
 
             // Hapus tanda tangan jika ada
-            if ($guestVisitor->signature_path && file_exists(public_path($guestVisitor->signature_path))) {
-                unlink(public_path($guestVisitor->signature_path));
+            if ($guestVisitor->signature_path) {
+                ImageUploadService::delete($guestVisitor->signature_path);
             }
 
             // Hapus relasi purposes
