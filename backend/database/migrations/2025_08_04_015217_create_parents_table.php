@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('address',150);
             $table->string('phone',20);
             $table->string('email',100)->nullable();
-            $table->text('purpose');
             $table->string('signature_path');
         });
     }
