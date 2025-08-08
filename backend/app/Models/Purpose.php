@@ -12,6 +12,11 @@ class Purpose extends Model
         'guest_type'
     ];
 
+    public function company()
+    {
+        return $this->morphTo(__FUNCTION__, 'guest_type', 'visitor_id');
+    }
+
     // public function visitor()
     // {
     //     return $this->morphTo(__FUNCTION__, 'guest_type', 'visitor_id');
