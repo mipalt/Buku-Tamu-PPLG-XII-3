@@ -23,4 +23,9 @@ class GuestAlumni extends Model
 
     public $timestamps = false;
 
+    public function purposes()
+{
+    return $this->morphOne(Purpose::class, 'visitor', 'guest_type', 'visitor_id');
+}
+
 }
