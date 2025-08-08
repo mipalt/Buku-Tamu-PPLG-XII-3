@@ -5,15 +5,16 @@ namespace App\Http\Controllers\web;
 use App\Helpers\ApiFormatter;
 use App\Http\Controllers\Controller;
 use App\Models\Visitor;
+use App\Models\Purpose;
 use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GuestVisitorController extends Controller
 {
-    //
     public function index()
     {
-        $visitors = Visitor::all();
+        $visitors = Visitor::with('purposes')->get();
 
         if ($visitors->isEmpty()) {
             return ApiFormatter::sendNotFound('No visitors found');
@@ -22,82 +23,138 @@ class GuestVisitorController extends Controller
         return ApiFormatter::sendSuccess('Visitors retrieved successfully', $visitors);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $visitor = Visitor::find($id);
-
-        if (!$visitor) {
-            return ApiFormatter::sendNotFound('Visitor not found');
-        }
-
-        return ApiFormatter::sendSuccess('Visitor retrieved successfully', $visitor);
-    }
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'institution' => 'nullable|string|max:100',
-            'phone' => 'required|string|max:20',
-            'email' => 'nullable|email|max:100',
-            'purpose' => 'required|string',
-            'signature_path' => 'required|image|max:2048'
+            'name'           => 'required|string|max:100',
+            'institution'    => 'nullable|string|max:100',
+            'phone'          => 'required|string|max:20',
+            'email'          => 'nullable|email|max:100',
+            'purpose'        => 'required|string|max:1000',
+            'signature_path' => 'required|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
-        // Upload tanda tangan ke folder "uploads/signatures"
-        $validated['signature_path'] = ImageUploadService::upload($request->file('signature_path'), 'signatures');
-        $validated['created_at'] = now();
+        DB::beginTransaction();
+        try {
+            // Upload tanda tangan
+            $validated['signature_path'] = ImageUploadService::upload(
+                $request->file('signature_path'),
+                'signatures'
+            );
 
-        $visitor = Visitor::create($validated);
+            // Simpan ke guest_visitors
+            $guestVisitor = Visitor::create([
+                'name'           => $validated['name'],
+                'institution'    => $validated['institution'] ?? null,
+                'phone'          => $validated['phone'],
+                'email'          => $validated['email'] ?? null,
+                'signature_path' => $validated['signature_path'],
+                'created_at'     => now(),
+            ]);
 
-        return ApiFormatter::sendSuccess('Data successfully created!', $visitor);
-    }
-     public function update(Request $request, $id)
-    {
-        $visitor = Visitor::find($id);
+            // Simpan purpose ke tabel purposes (relasi polimorfik)
+            $guestVisitor->purposes()->create([
+                'purpose' => $validated['purpose'],
+                'visitor_id' => $guestVisitor->id,
+                'guest_type' => Visitor::class,
+                'created_at' => now(),
+            ]);
 
-        if (!$visitor) {
-            return response()->json(['message' => 'Visitor not found'], 404);
+            DB::commit();
+
+            return ApiFormatter::sendSuccess('Data successfully created!', $guestVisitor->load('purposes'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ApiFormatter::sendError('Failed to create data', $e->getMessage(), 500);
         }
+    }
+
+    public function update(Request $request, $id)
+    {
 
         $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:100',
-            'institution' => 'nullable|string|max:100',
-            'phone' => 'sometimes|required|string|max:20',
-            'email' => 'nullable|email|max:100',
-            'purpose' => 'sometimes|required|string',
+            'name'           => 'sometimes|required|string|max:100',
+            'institution'    => 'nullable|string|max:100',
+            'phone'          => 'sometimes|required|string|max:20',
+            'email'          => 'nullable|email|max:100',
+            'purpose'        => 'sometimes|required|string',
             'signature_path' => 'nullable|image|max:2048'
         ]);
 
-        if ($request->hasFile('signature_path')) {
-            // Hapus file lama
-            ImageUploadService::delete($visitor->signature_path);
+        DB::beginTransaction();
+        try {
 
-            // Upload baru
-            $validated['signature_path'] = ImageUploadService::upload($request->file('signature_path'), 'signatures');
+            $guestVisitor = Visitor::find($id);
+            if (!$guestVisitor) {
+                return ApiFormatter::sendNotFound('Visitor not found');
+            }
+
+            // Update file tanda tangan
+            if ($request->hasFile('signature_path')) {
+                if ($guestVisitor->signature_path && file_exists(public_path($guestVisitor->signature_path))) {
+                    unlink(public_path($guestVisitor->signature_path));
+                }
+                $guestVisitor->signature_path = ImageUploadService::upload($request->file('signature_path'), 'signature_company');
+            }
+
+            // Update guest_visitors
+            $guestVisitor->update([
+                'name'           => $validated['name'] ?? $guestVisitor->name,
+                'institution'    => $validated['institution'] ?? $guestVisitor->institution,
+                'phone'          => $validated['phone'] ?? $guestVisitor->phone,
+                'email'          => $validated['email'] ?? $guestVisitor->email,
+                'updated_at'     => now(),
+            ]);
+
+            // Update purpose kalau dikirim
+            // if (isset($validated['purpose'])) {
+            //     if ($guestVisitor->purposes->isNotEmpty()) {
+            //         $guestVisitor->purposes()->update([
+            //             'purpose' => $validated['purpose']
+            //         ]);
+            //     } else {
+            //         $guestVisitor->purposes()->create([
+            //             'purpose' => $validated['purpose']
+            //         ]);
+            //     }
+            // }
+
+            $guestVisitor->purposes()->updateOrCreate([
+                ['guest_type' => Visitor::class, 'visitor_id' => $guestVisitor->id],
+                ['purpose' => $validated['purpose'] ?? $guestVisitor->purposes->first()->purpose ?? null]
+            ]);
+                
+
+            DB::commit();
+            return ApiFormatter::sendSuccess('Data successfully updated!', $guestVisitor->load('purposes'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ApiFormatter::sendError('Failed to update data', $e->getMessage(), 500);
         }
-
-        $visitor->update($validated);
-
-        return ApiFormatter::sendSuccess('Data successfully updated!', $visitor);
     }
+
     public function destroy($id)
     {
-        $visitor = Visitor::find($id);
+        try {
+            $guestVisitor = Visitor::with('purposes')->find($id);
+            if (!$guestVisitor) {
+                return ApiFormatter::sendNotFound('Visitor not found');
+            }
 
-        if (!$visitor) {
-            return response()->json(['message' => 'Visitor not found'], 404);
+            // Hapus tanda tangan jika ada
+            if ($guestVisitor->signature_path && file_exists(public_path($guestVisitor->signature_path))) {
+                unlink(public_path($guestVisitor->signature_path));
+            }
+
+            // Hapus relasi purposes
+            $guestVisitor->purposes()->delete();
+
+            // Hapus data visitor
+            $guestVisitor->delete();
+
+            return ApiFormatter::sendSuccess('Data successfully deleted!');
+        } catch (\Exception $e) {
+            return ApiFormatter::sendError('Something went wrong', ['error' => $e->getMessage()], 500);
         }
-
-        ImageUploadService::delete($visitor->signature_path);
-
-        $visitor->delete();
-
-        return ApiFormatter::sendSuccess('Data successfully deleted!');
     }
 }

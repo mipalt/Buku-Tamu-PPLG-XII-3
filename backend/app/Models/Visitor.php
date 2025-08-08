@@ -13,9 +13,13 @@ class Visitor extends Model
         'institution',
         'phone',
         'email',
-        'purpose',
         'signature_path',
         'created_at',
         'updated_at'
     ];
+
+    public function purposes()
+    {
+        return $this->morphOne(Purpose::class, 'visitor', 'guest_type', 'visitor_id');
+    }
 }
