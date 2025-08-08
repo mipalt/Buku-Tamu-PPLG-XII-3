@@ -51,10 +51,20 @@ class ParentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
+public function show(string $id)
+{
+    $parent = Parents::findOrFail($id);
+
+    if ($parent->signature_path) {
+        $parent->signature_path = asset($parent->signature_path);
     }
+
+    return response()->json([
+        'message' => 'Data berhasil ditemukan',
+        'data' => $parent
+    ]);
+}
+
 
     /**
      * Update the specified resource in storage.
