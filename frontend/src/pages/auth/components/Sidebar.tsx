@@ -40,17 +40,17 @@ const Sidebar: React.FC = () => {
   const getMenuClass = (name: string) =>
     `flex items-center w-full p-2 rounded mb-2 transition ${
       activeMenu === name
-        ? "bg-[#05254B] text-white"
-        : "bg-[#DCE4F2] text-black hover:bg-[#BFD1EA]"
+        ? "bg-[#001E42] text-white"
+        : "bg-[#E2E8F0] text-black hover:bg-[#BFD1EA]"
     }`;
 
   const getIcon = (name: string, after: string, before: string) =>
     activeMenu === name ? after : before;
 
   return (
-    <aside className="bg-[#F6F8FA] h-screen w-64 flex flex-col border-r">
+    <aside className="bg-[#F3F3F3] h-screen w-64 flex flex-col border-r">
       {/* Logo */}
-      <div className="flex items-center justify-center h-20 border-b">
+      <div className="flex items-center justify-start h-20 px-4">
         <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
         <h1 className="text-xl font-bold text-black">BukuTamu</h1>
       </div>
@@ -61,7 +61,7 @@ const Sidebar: React.FC = () => {
         <button
           onClick={() => {
             setActiveMenu("Dashboard");
-            setIsAllDataOpen(true); // reset buka kalau mau
+            setIsAllDataOpen(false);
           }}
           className={getMenuClass("Dashboard")}
         >
@@ -76,7 +76,10 @@ const Sidebar: React.FC = () => {
         {/* All Data */}
         <div>
           <button
-            onClick={() => setIsAllDataOpen(!isAllDataOpen)}
+            onClick={() => {
+              setActiveMenu("All Data");
+              setIsAllDataOpen(!isAllDataOpen);
+            }}
             className={`flex items-center w-full p-2 rounded mb-2 justify-between transition ${
               activeMenu === "All Data" || isSubmenuActive
                 ? "bg-[#05254B] text-white"
@@ -103,7 +106,9 @@ const Sidebar: React.FC = () => {
               {allDataSubMenu.map((item) => (
                 <button
                   key={item.name}
-                  onClick={() => setActiveMenu(item.name)}
+                  onClick={() => {
+                    setActiveMenu(item.name);
+                  }}
                   className={getMenuClass(item.name)}
                 >
                   <img
@@ -119,13 +124,15 @@ const Sidebar: React.FC = () => {
         </div>
       </nav>
 
-      {/* Logout */}
-      <div className="p-4 border-t">
-        <button className="flex items-center w-full p-2 rounded bg-[#DCE4F2] hover:bg-[#BFD1EA] text-black">
-          <img src={LogoutIcon} alt="Logout" className="w-5 h-5" />
-          <span className="ml-2">Logout</span>
-        </button>
-      </div>
+      {/* Logout muncul selama All Data terbuka */}
+      {isAllDataOpen && (
+        <div className="p-4">
+          <button className="flex items-center w-full p-2 rounded bg-[#DCE4F2] hover:bg-[#BFD1EA] text-black">
+            <img src={LogoutIcon} alt="Logout" className="w-5 h-5" />
+            <span className="ml-2">Logout</span>
+          </button>
+        </div>
+      )}
     </aside>
   );
 };
