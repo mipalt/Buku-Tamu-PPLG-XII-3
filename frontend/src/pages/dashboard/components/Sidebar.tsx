@@ -1,27 +1,17 @@
 import { useState } from "react";
-
-// Logo
 import Logo from "../../../assets/logo.png";
-
-// Icons
 import DashboardAfter from "../../../assets/dashboard-after.png";
 import DashboardBefore from "../../../assets/dashboard-before.png";
-
 import AllDataAfter from "../../../assets/all-data-after.png";
 import AllDataBefore from "../../../assets/all-data-before.png";
-
 import OrangTuaAfter from "../../../assets/orangtua-after.png";
 import OrangTuaBefore from "../../../assets/orangtua-before.png";
-
 import AlumniAfter from "../../../assets/alumni-after.png";
 import AlumniBefore from "../../../assets/alumni-before.png";
-
 import KunjunganAfter from "../../../assets/kunjungan-after.png";
 import KunjunganBefore from "../../../assets/kunjungan-before.png";
-
 import PerusahaanAfter from "../../../assets/perusahaan-after.png";
 import PerusahaanBefore from "../../../assets/perusahaan-before.png";
-
 import LogoutIcon from "../../../assets/Logout.png";
 
 const Sidebar: React.FC = () => {
@@ -48,16 +38,13 @@ const Sidebar: React.FC = () => {
     activeMenu === name ? after : before;
 
   return (
-    <aside className="bg-[#F3F3F3] h-screen w-64 flex flex-col border-r">
-      {/* Logo */}
-      <div className="flex items-center justify-start h-20 px-4">
+    <aside className="bg-[#F3F3F3] h-screen w-64 flex flex-col border-r" style={{ borderColor: "#D9D9D9" }}>
+      <div className="flex items-center justify-start h-20 px-4 border-b" style={{ borderColor: "#D9D9D9" }}>
         <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
         <h1 className="text-xl font-bold text-black">BukuTamu</h1>
       </div>
 
-      {/* Menu */}
       <nav className="flex-1 p-4">
-        {/* Dashboard */}
         <button
           onClick={() => {
             setActiveMenu("Dashboard");
@@ -73,7 +60,6 @@ const Sidebar: React.FC = () => {
           <span className="ml-2">Dashboard</span>
         </button>
 
-        {/* All Data */}
         <div>
           <button
             onClick={() => {
@@ -124,7 +110,6 @@ const Sidebar: React.FC = () => {
         </div>
       </nav>
 
-      {/* Logout muncul selama All Data terbuka */}
       {isAllDataOpen && (
         <div className="p-4">
           <button className="flex items-center w-full p-2 rounded bg-[#DCE4F2] hover:bg-[#BFD1EA] text-black">

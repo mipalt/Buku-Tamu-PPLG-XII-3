@@ -1,7 +1,4 @@
-// src/pages/dashboard/index.tsx
-import Sidebar from "../auth/components/Sidebar";
-
-// *** Perbaikan: naik 2 level dari src/pages/dashboard ke src, lalu ke assets ***
+import Sidebar from "./components/Sidebar";
 import OrangTuaIcon from "../../assets/orangtua-after.png";
 import KunjunganIcon from "../../assets/kunjungan-after.png";
 import AlumniIcon from "../../assets/alumni-after.png";
@@ -19,14 +16,10 @@ export default function Dashboard() {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        {/* Header biru tua */}
-        <header className="bg-[#001E42] text-white flex justify-end items-center h-16 px-6">
-          <button className="bg-[#001E42] px-4 py-2 rounded text-white flex items-center">
-            Admin
-          </button>
+        <header className="bg-[#001E42] text-white flex items-center h-16 px-6">
+          <h1 className="text-lg font-bold">Admin</h1>
         </header>
 
-        {/* Stats */}
         <main className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((item) => (
@@ -44,8 +37,6 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-
-          {/* Tambahkan konten lain (chart, tabel) di sini */}
         </main>
       </div>
     </div>
