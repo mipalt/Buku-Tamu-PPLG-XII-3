@@ -25,21 +25,32 @@ const Sidebar: React.FC = () => {
     { name: "Perusahaan", after: PerusahaanAfter, before: PerusahaanBefore },
   ];
 
-  const isSubmenuActive = allDataSubMenu.some(item => item.name === activeMenu);
+  const isSubmenuActive = allDataSubMenu.some((item) => item.name === activeMenu);
 
-  const getMenuClass = (name: string) =>
-    `flex items-center w-full p-2 rounded mb-2 transition ${
-      activeMenu === name
-        ? "bg-[#001E42] text-white"
-        : "bg-[#E2E8F0] text-black hover:bg-[#BFD1EA]"
+  const getMenuClass = (name: string, isAllDataChild = false) => {
+    const isActive = activeMenu === name;
+    if (isActive) {
+      return "flex items-center w-full p-2 rounded mb-2 transition bg-[#001E42] text-white";
+    }
+    return `flex items-center w-full p-2 rounded mb-2 transition ${
+      isAllDataChild
+        ? "bg-[#CBD5E1] text-black hover:bg-[#BFD1EA]" // submenu
+        : "bg-[#E2E8F0] text-black hover:bg-[#BFD1EA]" // dashboard & all data
     }`;
+  };
 
   const getIcon = (name: string, after: string, before: string) =>
     activeMenu === name ? after : before;
 
   return (
-    <aside className="bg-[#F3F3F3] h-screen w-64 flex flex-col border-r" style={{ borderColor: "#D9D9D9" }}>
-      <div className="flex items-center justify-start h-20 px-4 border-b" style={{ borderColor: "#D9D9D9" }}>
+    <aside
+      className="bg-[#F3F3F3] h-screen w-64 flex flex-col border-r"
+      style={{ borderColor: "#D9D9D9" }}
+    >
+      <div
+        className="flex items-center justify-start h-20 px-4 border-b"
+        style={{ borderColor: "#D9D9D9" }}
+      >
         <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
         <h1 className="text-xl font-bold text-black">BukuTamu</h1>
       </div>
@@ -69,7 +80,7 @@ const Sidebar: React.FC = () => {
             className={`flex items-center w-full p-2 rounded mb-2 justify-between transition ${
               activeMenu === "All Data" || isSubmenuActive
                 ? "bg-[#05254B] text-white"
-                : "bg-[#DCE4F2] text-black hover:bg-[#BFD1EA]"
+                : "bg-[#E2E8F0] text-black hover:bg-[#BFD1EA]"
             }`}
           >
             <div className="flex items-center">
@@ -95,7 +106,7 @@ const Sidebar: React.FC = () => {
                   onClick={() => {
                     setActiveMenu(item.name);
                   }}
-                  className={getMenuClass(item.name)}
+                  className={getMenuClass(item.name, true)}
                 >
                   <img
                     src={getIcon(item.name, item.after, item.before)}
