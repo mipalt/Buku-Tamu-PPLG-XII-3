@@ -16,7 +16,7 @@ export default function Dashboard() {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <header className="bg-[#001E42] text-white flex items-center h-16 px-6">
+        <header className="bg-[#001E42] text-white flex items-center h-20 pl-6">
           <h1 className="text-lg font-bold">Admin</h1>
         </header>
 
