@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Web;
 
 use App\Helpers\ApiFormatter;
+use App\Helpers\PaginationFormatter;
 use App\Http\Controllers\Controller;
+use App\Repositories\ParentRepository;
 use App\Models\Parents;
 use App\Models\Purpose;
 use App\Services\ImageUploadService;
@@ -12,16 +14,31 @@ use Illuminate\Support\Facades\DB;
 
 class ParentController extends Controller
 {
- public function index()
- {
-  $parents = Parents::with('purposes')->get();
 
-  if ($parents->isEmpty()) {
-   return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
-  }
+    protected $parentsRepo;
 
-  return ApiFormatter::sendSuccess('Data berhasil ditemukan', $parents);
- }
+    public function __construct(ParentRepository $parentsRepo)
+    {
+        $this->parentsRepo = $parentsRepo;
+    }
+public function index(Request $request)
+{
+    $filters = $request->only(['search', 'limit', 'sortOrder', 'page']);
+    
+    $parents = $this->parentsRepo->getAllParents($filters);
+
+    if ($parents->isEmpty()) {
+        return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
+    }
+
+    return ApiFormatter::sendSuccess(
+        'Data berhasil ditemukan',
+        $parents->items(),
+        200,
+        ['pagination' => PaginationFormatter::format($parents)]
+    );
+}
+
 
  public function store(Request $request)
  {
