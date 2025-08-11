@@ -15,5 +15,5 @@ Route::prefix('mobile')->group(function () {
 Route::prefix('web')->group(function () {
   Route::get('/users', [UserController::class, 'index']);
 });
-   
-Route::apiResource('parents', ParentController::class);
+
+Route::apiResource('guest-parents', ParentController::class);
