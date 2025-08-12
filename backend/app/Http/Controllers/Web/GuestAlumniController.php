@@ -33,11 +33,22 @@ class GuestAlumniController extends Controller
 
     return ApiFormatter::sendSuccess(
         'Guest alumni retrieved successfully',
-        $alumni,
+        $alumni->items(), // hanya data list, tanpa pagination info
         200,
-        ['pagination' => PaginationFormatter::format($alumni)]
+        [
+            'pagination' => [
+                'total_data'   => $alumni->total(),
+                'per_page'     => $alumni->perPage(),
+                'current_page' => $alumni->currentPage(),
+                'last_page'    => $alumni->lastPage(),
+                'next_page'    => $alumni->nextPageUrl(),
+                'prev_page'    => $alumni->previousPageUrl(),
+                'has_more'     => $alumni->hasMorePages()
+            ]
+        ]
     );
 }
+
 
 
     public function show($id)
