@@ -3,23 +3,40 @@
 namespace App\Http\Controllers\Web;
 
 use App\Helpers\ApiFormatter;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Helpers\PaginationFormatter;
+use App\Repositories\CompanyRepository;
+use App\Http\Resources\CompanyResource;
+use App\Services\ImageUploadService;
 use App\Models\GuestCompany;
 use Illuminate\Support\Facades\DB;
-use App\Services\ImageUploadService;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class GuestCompanyController extends Controller
 {
-    public function index()
+    protected CompanyRepository $companyRepo;
+
+    public function __construct(CompanyRepository $companyRepository)
     {
-        $companies = GuestCompany::with('purposes')->get();
+        $this->companyRepo = $companyRepository;
+    }
+
+    public function index(Request $request)
+    {
+        $filters = $request->only(['search', 'limit', 'sortOrder', 'page']);
+
+        $companies = $this->companyRepo->getAllCompanies($filters);
 
         if ($companies->isEmpty()) {
             return ApiFormatter::sendNotFound('Guest company not found');
         }
 
-        return ApiFormatter::sendSuccess('Guest companies retrieved successfully', $companies);
+        return ApiFormatter::sendSuccess(
+            'Guest companies retrieved successfully',
+            CompanyResource::collection($companies),
+            200,
+            ['pagination' => PaginationFormatter::format($companies)]
+        );
     }
 
     public function show($id)
