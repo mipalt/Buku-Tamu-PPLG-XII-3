@@ -10,6 +10,8 @@ class ParentsTableSeeder extends Seeder
 {
     public function run(): void
     {
+        Parents::factory()->count(50)->create();
+
         $data = [
             [
                 'name' => 'Budi Santoso',

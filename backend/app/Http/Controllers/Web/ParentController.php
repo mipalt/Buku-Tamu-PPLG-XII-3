@@ -14,162 +14,161 @@ use Illuminate\Support\Facades\DB;
 
 class ParentController extends Controller
 {
-
     protected $parentsRepo;
-
     public function __construct(ParentRepository $parentsRepo)
     {
         $this->parentsRepo = $parentsRepo;
     }
-public function index(Request $request)
-{
-    $filters = $request->only(['search', 'limit', 'sortOrder', 'page']);
-    
-    $parents = $this->parentsRepo->getAllParents($filters);
 
-    if ($parents->isEmpty()) {
-        return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
+    public function index(Request $request)
+    {
+        $filters = $request->only(['search', 'limit', 'sortOrder', 'page']);
+
+        $parents = $this->parentsRepo->getAllParents($filters);
+
+        if ($parents->isEmpty()) {
+            return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
+        }
+
+        return ApiFormatter::sendSuccess(
+            'Data berhasil ditemukan',
+            $parents->items(),
+            200,
+            ['pagination' => PaginationFormatter::format($parents)]
+        );
     }
 
-    return ApiFormatter::sendSuccess(
-        'Data berhasil ditemukan',
-        $parents->items(),
-        200,
-        ['pagination' => PaginationFormatter::format($parents)]
-    );
-}
 
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string',
+            'student_name' => 'required|string',
+            'rayon' => 'required|string',
+            'address' => 'required|string',
+            'phone' => 'required|string|max:20|unique:parents,phone',
+            'email' => 'nullable|email|unique:parents',
+            'purpose' => 'required|string|max:1000',
+            'signature_path' => 'required|file|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
- public function store(Request $request)
- {
-  $data = $request->validate([
-   'name' => 'required|string',
-   'student_name' => 'required|string',
-   'rayon' => 'required|string',
-   'address' => 'required|string',
-   'phone' => 'required|string|max:20|unique:parents,phone',
-   'email' => 'nullable|email|unique:parents',
-   'purpose' => 'required|string|max:1000',
-   'signature_path' => 'required|file|mimes:jpg,jpeg,png|max:2048',
-  ]);
+        DB::beginTransaction();
 
-  DB::beginTransaction();
+        try {
+            if ($request->hasFile('signature_path')) {
+                $data['signature_path'] = ImageUploadService::upload(
+                    $request->file('signature_path'),
+                    'guest-parent'
+                );
+            }
 
-  try {
-   if ($request->hasFile('signature_path')) {
-    $data['signature_path'] = ImageUploadService::upload(
-     $request->file('signature_path'),
-     'guest-parent'
-    );
-   }
+            $parent = Parents::create($data);
 
-   $parent = Parents::create($data);
+            $parent->purposes()->create([
+                'purpose' => $data['purpose'],
+                'visitor_id' => $parent->id,
+                'guest_type' => Parents::class,
+            ]);
 
-   $parent->purposes()->create([
-    'purpose' => $data['purpose'],
-    'visitor_id' => $parent->id,
-    'guest_type' => Parents::class,
-   ]);
+            DB::commit();
 
-   DB::commit();
-
-   return ApiFormatter::sendSuccess('Data berhasil disimpan', $parent->load('purposes'));
-  } catch (\Exception $e) {
-   DB::rollBack();
-   return ApiFormatter::sendServerError('Terjadi kesalahan', ['error' => $e->getMessage()]);
-  }
- }
-
- public function show(string $id)
- {
-  $parent = Parents::with('purposes')->find($id);
-
-  if (!$parent) {
-   return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
-  }
-
-  if ($parent->signature_path) {
-   $parent->signature_path = asset($parent->signature_path);
-  }
-
-  return ApiFormatter::sendSuccess('Data berhasil ditemukan', $parent);
- }
-
- public function update(Request $request, string $id)
- {
-  $parent = Parents::find($id);
-
-  if (!$parent) {
-   return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
-  }
-
-  $data = $request->validate([
-   'name' => 'sometimes|string',
-   'student_name' => 'sometimes|string',
-   'rayon' => 'sometimes|string',
-   'address' => 'sometimes|string',
-   'phone' => 'sometimes|string|max:20|unique:parents,phone,' . $id,
-   'email' => 'nullable|email|unique:parents,email,' . $id,
-   'purpose' => 'sometimes|string|max:1000',
-   'signature_path' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-  ]);
-
-  DB::beginTransaction();
-
-  try {
-   if ($request->hasFile('signature_path')) {
-    if ($parent->signature_path) {
-     ImageUploadService::delete($parent->signature_path);
+            return ApiFormatter::sendSuccess('Data berhasil disimpan', $parent->load('purposes'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ApiFormatter::sendServerError('Terjadi kesalahan', ['error' => $e->getMessage()]);
+        }
     }
 
-    $data['signature_path'] = ImageUploadService::upload(
-     $request->file('signature_path'),
-     'guest-parent'
-    );
-   }
+    public function show(string $id)
+    {
+        $parent = Parents::with('purposes')->find($id);
 
-   $parent->update($data);
+        if (!$parent) {
+            return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
+        }
 
-   if (isset($data['purpose'])) {
-    $parent->purposes()->updateOrCreate(
-     ['visitor_id' => $parent->id, 'guest_type' => Parents::class],
-     ['purpose' => $data['purpose']]
-    );
-   }
+        if ($parent->signature_path) {
+            $parent->signature_path = asset($parent->signature_path);
+        }
 
-   DB::commit();
+        return ApiFormatter::sendSuccess('Data berhasil ditemukan', $parent);
+    }
 
-   return ApiFormatter::sendSuccess('Data berhasil diperbarui', $parent->load('purposes'));
-  } catch (\Exception $e) {
-   DB::rollBack();
-   return ApiFormatter::sendServerError('Gagal memperbarui data', ['error' => $e->getMessage()]);
-  }
- }
+    public function update(Request $request, string $id)
+    {
+        $parent = Parents::find($id);
 
- public function destroy(string $id)
- {
-  $parent = Parents::with('purposes')->find($id);
+        if (!$parent) {
+            return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
+        }
 
-  if (!$parent) {
-   return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
-  }
+        $data = $request->validate([
+            'name' => 'sometimes|string',
+            'student_name' => 'sometimes|string',
+            'rayon' => 'sometimes|string',
+            'address' => 'sometimes|string',
+            'phone' => 'sometimes|string|max:20|unique:parents,phone,' . $id,
+            'email' => 'nullable|email|unique:parents,email,' . $id,
+            'purpose' => 'sometimes|string|max:1000',
+            'signature_path' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
-  DB::beginTransaction();
+        DB::beginTransaction();
 
-  try {
-   if ($parent->signature_path) {
-    ImageUploadService::delete($parent->signature_path);
-   }
+        try {
+            if ($request->hasFile('signature_path')) {
+                if ($parent->signature_path) {
+                    ImageUploadService::delete($parent->signature_path);
+                }
 
-   $parent->purposes()->delete();
-   $parent->delete();
+                $data['signature_path'] = ImageUploadService::upload(
+                    $request->file('signature_path'),
+                    'guest-parent'
+                );
+            }
 
-   DB::commit();
+            $parent->update($data);
 
-   return ApiFormatter::sendSuccess('Data berhasil dihapus');
-  } catch (\Exception $e) {
-   DB::rollBack();
-   return ApiFormatter::sendServerError('Gagal menghapus data', ['error' => $e->getMessage()]);
-  }
- }
+            if (isset($data['purpose'])) {
+                $parent->purposes()->updateOrCreate(
+                    ['visitor_id' => $parent->id, 'guest_type' => Parents::class],
+                    ['purpose' => $data['purpose']]
+                );
+            }
+
+            DB::commit();
+
+            return ApiFormatter::sendSuccess('Data berhasil diperbarui', $parent->load('purposes'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ApiFormatter::sendServerError('Gagal memperbarui data', ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function destroy(string $id)
+    {
+        $parent = Parents::with('purposes')->find($id);
+
+        if (!$parent) {
+            return ApiFormatter::sendNotFound('Data orang tua tidak ditemukan');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            if ($parent->signature_path) {
+                ImageUploadService::delete($parent->signature_path);
+            }
+
+            $parent->purposes()->delete();
+            $parent->delete();
+
+            DB::commit();
+
+            return ApiFormatter::sendSuccess('Data berhasil dihapus');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ApiFormatter::sendServerError('Gagal menghapus data', ['error' => $e->getMessage()]);
+        }
+    }
 }
