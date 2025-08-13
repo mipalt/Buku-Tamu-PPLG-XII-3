@@ -4,6 +4,8 @@ namespace App\Http\Controllers\web;
 
 use App\Helpers\ApiFormatter;
 use App\Http\Controllers\Controller;
+use App\Repositories\VisitorRepository;
+use App\Helpers\PaginationFormatter;
 use App\Models\Visitor;
 use App\Models\Purpose;
 use App\Services\ImageUploadService;
@@ -12,15 +14,39 @@ use Illuminate\Support\Facades\DB;
 
 class GuestVisitorController extends Controller
 {
-    public function index()
+    // public function index()
+    // {
+    //     $visitors = Visitor::with('purposes')->get();
+
+    //     if ($visitors->isEmpty()) {
+    //         return ApiFormatter::sendNotFound('No visitors found');
+    //     }
+
+    //     return ApiFormatter::sendSuccess('Visitors retrieved successfully', $visitors);
+    // }
+
+    protected $visitorRepo;
+
+    public function __construct(VisitorRepository $visitorRepo)
     {
-        $visitors = Visitor::with('purposes')->get();
+        $this->visitorRepo = $visitorRepo;
+    }
+    public function index(Request $request)
+    {
+        $filters = $request->only(['search', 'limit', 'sortOrder', 'page']);
+        
+        $visitors = $this->visitorRepo->getAllVisitor($filters);
 
         if ($visitors->isEmpty()) {
-            return ApiFormatter::sendNotFound('No visitors found');
+            return ApiFormatter::sendNotFound('Data Tamu tidak ditemukan');
         }
 
-        return ApiFormatter::sendSuccess('Visitors retrieved successfully', $visitors);
+        return ApiFormatter::sendSuccess(
+            'Data berhasil ditemukan',
+            $visitors->items(),
+            200,
+            ['pagination' => PaginationFormatter::format($visitors)]
+        );
     }
 
     public function show($id)
