@@ -12,16 +12,16 @@ class ExportDataController extends Controller
     public function export(Request $request)
     {
         $request->validate([
-            'type'       => 'required|in:parents,alumni,visitors,companies',
+            'type' => 'required|in:parents,alumni,visitors,companies',
             'start_date' => 'nullable|date',
-            'end_date'   => 'nullable|date',
-            'format'     => 'nullable|in:Xlsx,Csv'
+            'end_date' => 'nullable|date',
+            'format' => 'nullable|in:Xlsx,Csv'
         ]);
 
-        $type   = $request->type;
-        $start  = $request->start_date;
-        $end    = $request->end_date;
-        $format = $request->format ?? 'Xlsx';
+        $type = $request->input('type');
+        $start = $request->input('start_date');
+        $end = $request->input('end_date');
+        $format = $request->input('format', 'Xlsx');
 
         $fileName = "guest_{$type}";
         if ($start && $end) {
