@@ -1,16 +1,39 @@
 import { useState } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import authService from "../../services/authService";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [, setErrorMsg] = useState("");
+    const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        alert("Login success with email : " + email);
+        setErrorMsg("");
+        setLoading(true);
+
+        try {
+            await authService.login({ email, password });
+
+            toast.success("Login berhasil!"); // <-- toast success login
+
+            navigate("/tes-logout", { replace: true });
+        } catch (err: any) {
+            const message = err?.message || "Login gagal. Coba lagi.";
+            setErrorMsg(message);
+
+            toast.error(message); // <-- toast error login
+        } finally {
+            setLoading(false);
+        }
     };
+
 
     return (
         <div className="relative flex items-center justify-center h-screen bg-white overflow-hidden">
@@ -59,6 +82,7 @@ const Login = () => {
             >
                 <h2 className="text-4xl font-semibold mb-10 text-center text-[#001E42]">Log in</h2>
                 <form onSubmit={handleLogin} className="space-y-8">
+                    {/* Email */}
                     <div className="mx-8">
                         <div className="relative">
                             <label className="absolute left-4 -top-1 bg-white px-2 text-black font-semibold text-base">
@@ -67,7 +91,7 @@ const Login = () => {
                             <input
                                 type="email"
                                 placeholder="Masukan Email..."
-                                className="w-full px-6 py-5 pr-16 text-black border-1 border-gray-400 rounded-xl text-lg mt-3"
+                                className="w-full px-6 py-5 pr-16 text-black border rounded-xl text-lg mt-3"
                                 style={{ borderColor: "#27374D" }}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -78,6 +102,8 @@ const Login = () => {
                             </span>
                         </div>
                     </div>
+
+                    {/* Password */}
                     <div className="mx-8 mt-8">
                         <div className="relative">
                             <label className="absolute left-4 -top-1 bg-white px-2 text-black font-semibold text-base">
@@ -86,11 +112,12 @@ const Login = () => {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Masukkan Kata Sandi..."
-                                className="w-full px-6 py-5 pr-16 text-black border-1 border-gray-400 rounded-xl text-lg mt-3"
+                                className="w-full px-6 py-5 pr-16 text-black border rounded-xl text-lg mt-3"
                                 style={{ borderColor: "#27374D" }}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
+                                minLength={6}
                             />
                             <button
                                 type="button"
@@ -102,12 +129,15 @@ const Login = () => {
                             </button>
                         </div>
                     </div>
+
+                    {/* Submit */}
                     <div className="flex justify-center">
                         <button
                             type="submit"
-                            className="w-96 justify-center items-center flex bg-[#001E42] text-white py-4 rounded-xl text-xl font-semibold hover:bg-[#27374D] transition"
+                            disabled={loading}
+                            className="w-96 justify-center items-center flex bg-[#001E42] text-white py-4 rounded-xl text-xl font-semibold hover:bg-[#27374D] transition disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Masuk
+                            {loading ? "Masuk..." : "Masuk"}
                         </button>
                     </div>
                 </form>

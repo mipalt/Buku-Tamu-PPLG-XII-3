@@ -2,28 +2,31 @@
 
 namespace App\Repositories;
 
-use App\Models\User;
+use App\Models\GuestAlumni;
 use Illuminate\Support\Facades\Schema;
 
-class UserRepository
+class GuestAlumniRepository
 {
-    protected User $model;
+    protected GuestAlumni $alumni;
 
-    public function __construct(User $model)
+    public function __construct(GuestAlumni $alumni)
     {
-        $this->model = $model;
+        $this->alumni = $alumni;
     }
 
-    public function getAllUsers(array $filters = [])
+    public function getAllGuestAlumni(array $filters = ["name", "graduation_year", "major", "phone", "email"])
     {
-        $query = $this->model->query();
+        $query = $this->alumni->query();
 
         // === Search ===
         if (!empty($filters['search'])) {
             $search = trim($filters['search']);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                ->orWhere('graduation_year', 'like', "%{$search}%")
+                ->orWhere('major', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -31,7 +34,7 @@ class UserRepository
         $sortOrder = strtolower($filters['sortOrder'] ?? 'asc');
         $sortOrder = in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'asc';
 
-        if (Schema::hasColumn($this->model->getTable(), 'created_at')) {
+        if (Schema::hasColumn($this->alumni->getTable(), 'created_at')) {
             $query->orderBy('created_at', $sortOrder);
         }
 

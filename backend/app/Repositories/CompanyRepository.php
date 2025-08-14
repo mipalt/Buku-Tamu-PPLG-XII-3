@@ -2,21 +2,21 @@
 
 namespace App\Repositories;
 
-use App\Models\User;
+use App\Models\GuestCompany;
 use Illuminate\Support\Facades\Schema;
 
-class UserRepository
+class CompanyRepository
 {
-    protected User $model;
+    protected GuestCompany $model;
 
-    public function __construct(User $model)
+    public function __construct(GuestCompany $model)
     {
         $this->model = $model;
     }
 
-    public function getAllUsers(array $filters = [])
+    public function getAllCompanies(array $filters = [])
     {
-        $query = $this->model->query();
+        $query = $this->model->with('purposes');
 
         // === Search ===
         if (!empty($filters['search'])) {

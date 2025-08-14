@@ -1,12 +1,14 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/auth/login";
 import NotFoundPage from "../pages/not-found/NotFound";
+import TesLogout from "../pages/tes-logout/tes-logout";
 
 const AppRouter = () => {
     return (
         //ini untuk atur routes nya 
         <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/tes-logout" element={<TesLogout />} />
             <Route path="/" element={<Navigate to="/login" />} />
 
 
