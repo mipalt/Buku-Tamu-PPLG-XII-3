@@ -1,7 +1,7 @@
-import OrangTuaIcon from "../../../assets/orangtua-after.png";
-import KunjunganIcon from "../../../assets/kunjungan-after.png";
-import AlumniIcon from "../../../assets/alumni-after.png";
-import PerusahaanIcon from "../../../assets/perusahaan-after.png";
+import OrangTuaIcon from "../assets/orangtua-after.png";
+import KunjunganIcon from "../assets/kunjungan-after.png";
+import AlumniIcon from "../assets/alumni-after.png";
+import PerusahaanIcon from "../assets/perusahaan-after.png";
 
 export default function Upperbar() {
   const stats = [
