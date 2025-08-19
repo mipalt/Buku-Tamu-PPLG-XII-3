@@ -29,7 +29,7 @@ const EditVisitor: React.FC<EditVisitorProps> = ({ visitor, onSuccess }) => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': 'Bearer 2|CU89f1cBu9Od4g6w5IflwQzXs2p32Vl9RXel7FPOea57a91c'
+          'Authorization': 'Bearer 1|8zyBAVvHRSeE8mwAeTmL7TuwjsDVbOMiEM10Exon3e29ec94'
         },
         body: JSON.stringify(form)
       });

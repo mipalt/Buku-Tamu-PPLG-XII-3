@@ -16,7 +16,7 @@ const DeleteVisitor: React.FC<DeleteVisitorProps> = ({ id, onSuccess }) => {
         method: 'DELETE', // sesuai Route::apiResource
         headers: {
           'Accept': 'application/json',
-          'Authorization': 'Bearer 2|CU89f1cBu9Od4g6w5IflwQzXs2p32Vl9RXel7FPOea57a91c'
+          'Authorization': 'Bearer 1|8zyBAVvHRSeE8mwAeTmL7TuwjsDVbOMiEM10Exon3e29ec94'
         }
       });
 

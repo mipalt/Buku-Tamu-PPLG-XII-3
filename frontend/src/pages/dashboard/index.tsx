@@ -1,3 +1,11 @@
-export default function Dashboard() {
-  return <h1>hai</h1>;
+import React from 'react'
+
+function Dashboard() {
+  return (
+    <div>
+      ini dashboard
+    </div>
+  )
 }
+
+export default Dashboard

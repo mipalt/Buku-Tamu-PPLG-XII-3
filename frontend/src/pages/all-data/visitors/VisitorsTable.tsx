@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, Trash2, Edit, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import EditVisitor from './EditVisitor';
-import DeleteVisitor from './DeleteVisitor';
+import React, { useState, useEffect } from "react";
+import {
+  Search,
+  ChevronDown,
+  Edit,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import EditVisitor from "./EditVisitor";
+import DeleteVisitor from "./DeleteVisitor";
+import { useFetch } from "../../../hooks/useFetch";
 
 interface TableRow {
   id: number;
   name: string;
   institution: string;
+  purposes: string;
   phone: string;
   email: string;
   signature_path?: string;
@@ -15,50 +24,26 @@ interface TableRow {
 }
 
 const DataTable: React.FC = () => {
-  const [data, setData] = useState<TableRow[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const [editingVisitor, setEditingVisitor] = useState<TableRow | null>(null);
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/guest-visitors', {
-        headers: {
-          'Authorization': 'Bearer 2|CU89f1cBu9Od4g6w5IflwQzXs2p32Vl9RXel7FPOea57a91c',
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
-      const result = await response.json();
-      setData(Array.isArray(result.data) ? result.data : []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const filteredData = data.filter(row =>
-    (row.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (row.institution || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (row.phone || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (row.email || '').toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = data.filter(
+    (row) =>
+      (row.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (row.institution || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (row.purposes || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (row.phone || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (row.email || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const {
+    data,
+    isLoading: loading,
+    error,
+  } = useFetch<TableRow[]>("http://127.0.0.1:8000/api/guest-visitors");
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -106,8 +91,19 @@ const DataTable: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {['#', 'NAME', 'INSTITUTION', 'PHONE', 'EMAIL', 'TANGGAL', 'AKSI'].map((head) => (
-                  <th key={head} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {[
+                  "#",
+                  "NAME",
+                  "INSTITUTION",
+                  "PHONE",
+                  "EMAIL",
+                  "TANGGAL",
+                  "AKSI",
+                ].map((head) => (
+                  <th
+                    key={head}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     {head}
                   </th>
                 ))}
@@ -116,13 +112,27 @@ const DataTable: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {currentData.map((row) => (
                 <tr key={row.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 break-words max-w-xs">{row.institution}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.phone}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(row.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    {row.id}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {row.name}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900 break-words max-w-xs">
+                    {row.institution}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {row.phone}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {row.email}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {new Date(row.created_at).toLocaleDateString("id-ID", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
@@ -150,7 +160,8 @@ const DataTable: React.FC = () => {
       {/* Pagination */}
       <div className="flex items-center justify-between mt-6">
         <div className="text-sm text-gray-700">
-          {startIndex + 1}-{Math.min(endIndex, filteredData.length)} of {filteredData.length}
+          {startIndex + 1}-{Math.min(endIndex, filteredData.length)} of{" "}
+          {filteredData.length}
         </div>
         <div className="flex items-center space-x-2">
           <select
@@ -162,7 +173,9 @@ const DataTable: React.FC = () => {
             className="border border-gray-300 rounded px-2 py-1 text-sm"
           >
             {[10, 25, 50].map((n) => (
-              <option key={n} value={n}>{n}</option>
+              <option key={n} value={n}>
+                {n}
+              </option>
             ))}
           </select>
           <div className="flex items-center space-x-1 ml-4">
@@ -177,7 +190,9 @@ const DataTable: React.FC = () => {
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
               disabled={currentPage === totalPages}
               className="p-1 text-gray-600 hover:text-gray-900 disabled:text-gray-400"
             >
