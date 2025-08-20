@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Web;
 
 use App\Helpers\ApiFormatter;
+use App\Helpers\PaginationFormatter;
 use App\Http\Resources\UserResource;
 use App\Repositories\UserRepository;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -16,14 +18,22 @@ class UserController extends Controller
         $this->userRepo = $userRepository;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = $this->userRepo->getAllUsers();
+        // Ambil filter dari query string
+        $filters = $request->only(['search', 'limit', 'sortOrder', 'page']);
 
-        if (!$users || $users->isEmpty()) {
+        $users = $this->userRepo->getAllUsers($filters);
+
+        if ($users->isEmpty()) {
             return ApiFormatter::sendNotFound('No users found');
         }
 
-        return ApiFormatter::sendSuccess("Users retrieved successfully", UserResource::collection($users));
+        return ApiFormatter::sendSuccess(
+            "Users retrieved successfully",
+            UserResource::collection($users),
+            200,
+            ['pagination' => PaginationFormatter::format($users)]
+        );
     }
 }

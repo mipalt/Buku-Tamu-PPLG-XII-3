@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Web;
 
 use App\Helpers\ApiFormatter;
+use App\Helpers\PaginationFormatter;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Repositories\GuestAlumniRepository;
 use App\Models\GuestAlumni;
 use Illuminate\Support\Facades\DB;
 use App\Services\ImageUploadService;
@@ -12,16 +14,42 @@ use App\Services\ImageUploadService;
 
 class GuestAlumniController extends Controller
 {
-    public function index()
+     protected $alumniRepo;
+
+    public function __construct(GuestAlumniRepository $alumniRepo)
     {
-        $alumni = GuestAlumni::with('purposes')->get();
-
-        if ($alumni->isEmpty()) {
-            return ApiFormatter::sendNotFound('Guest alumni not found');
-        }
-
-        return ApiFormatter::sendSuccess('Guest alumni retrieved successfully', $alumni);
+        $this->alumniRepo = $alumniRepo;
     }
+
+    public function index(Request $request)
+{
+    $filters = $request->only(['search', 'limit', 'sortOrder', 'page']);
+
+    $alumni = $this->alumniRepo->getAllGuestAlumni($filters);
+
+    if ($alumni->isEmpty()) {
+        return ApiFormatter::sendNotFound('Guest alumni not found');
+    }
+
+    return ApiFormatter::sendSuccess(
+        'Guest alumni retrieved successfully',
+        $alumni->items(), 
+        200,
+        [
+            'pagination' => [
+                'total_data'   => $alumni->total(),
+                'per_page'     => $alumni->perPage(),
+                'current_page' => $alumni->currentPage(),
+                'last_page'    => $alumni->lastPage(),
+                'next_page'    => $alumni->nextPageUrl(),
+                'prev_page'    => $alumni->previousPageUrl(),
+                'has_more'     => $alumni->hasMorePages()
+            ]
+        ]
+    );
+}
+
+
 
     public function show($id)
     {
