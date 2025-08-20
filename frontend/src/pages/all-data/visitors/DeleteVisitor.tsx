@@ -1,46 +1,31 @@
-import React, { useState } from 'react';
+import React from "react";
+import { Trash2 } from "lucide-react";
 
 interface DeleteVisitorProps {
   id: number;
-  onSuccess: () => void;
+  mutate: () => void;
 }
 
-const DeleteVisitor: React.FC<DeleteVisitorProps> = ({ id, onSuccess }) => {
-  const [loading, setLoading] = useState(false);
-
+const DeleteVisitor: React.FC<DeleteVisitorProps> = ({ id, mutate }) => {
   const handleDelete = async () => {
-    if (!confirm('Yakin mau menghapus data ini?')) return;
-    setLoading(true);
+    if (!confirm("Yakin hapus data ini?")) return;
+
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/guest-visitors/${id}`, {
-        method: 'DELETE', // sesuai Route::apiResource
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer 1|8zyBAVvHRSeE8mwAeTmL7TuwjsDVbOMiEM10Exon3e29ec94'
-        }
+      await fetch(`http://127.0.0.1:8000/api/guest-visitors/${id}`, {
+        method: "DELETE",
       });
-
-      if (!response.ok) {
-        const err = await response.json();
-        alert(err.message || 'Gagal menghapus data');
-        return;
-      }
-
-      onSuccess();
+      mutate(); // refresh data
     } catch (error) {
-      alert('Terjadi kesalahan saat menghapus data');
-    } finally {
-      setLoading(false);
+      console.error("Gagal hapus data", error);
     }
   };
 
   return (
     <button
       onClick={handleDelete}
-      disabled={loading}
-      className="bg-red-500 text-white px-4 py-2 rounded"
+      className="text-red-600 hover:text-red-800 p-1"
     >
-      {loading ? 'Menghapus...' : 'Hapus'}
+      <Trash2 className="w-4 h-4" />
     </button>
   );
 };
