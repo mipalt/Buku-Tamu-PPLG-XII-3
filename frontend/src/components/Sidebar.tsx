@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import Logo from "../assets/logo.png";
@@ -52,23 +52,29 @@ const Sidebar: React.FC = () => {
     location.pathname.startsWith(item.path)
   );
 
+  // Auto-expand submenu jika ada item yang aktif
+  useEffect(() => {
+    if (isSubmenuActive) {
+      setAllDataOpen(true);
+    }
+  }, [isSubmenuActive]);
+
   const getMenuClass = (isActive: boolean, isSubmenu = false) =>
     isActive
-      ? "flex items-center w-full p-2 rounded mb-2 transition bg-[#001E42] text-white"
-      : `flex items-center w-full p-2 rounded mb-2 transition ${
-          isSubmenu
-            ? "bg-[#CBD5E1] text-black hover:bg-[#BFD1EA]"
-            : "bg-[#E2E8F0] text-black hover:bg-[#BFD1EA]"
-        }`;
+      ? "flex items-center w-full p-3 rounded-lg mb-2 transition-all duration-300 ease-out transform bg-[#001E42] text-white shadow-md"
+      : `flex items-center w-full p-3 rounded-lg mb-2 transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-sm ${isSubmenu
+        ? "bg-[#CBD5E1] text-black hover:bg-[#BFD1EA] ml-4"
+        : "bg-[#E2E8F0] text-black hover:bg-[#BFD1EA]"
+      }`;
 
   return (
     <aside
-      className="bg-[#F3F3F3] h-screen w-64 flex flex-col border-r"
+      className="bg-[#F3F3F3] h-screen w-64 flex flex-col border-r transition-all duration-300 flex-shrink-0"
       style={{ borderColor: "#D9D9D9" }}
     >
       {/* Logo */}
       <div
-        className="flex items-center justify-start h-20 px-4 border-b"
+        className="flex items-center justify-start h-20 px-4 border-b transition-all duration-300"
         style={{ borderColor: "#D9D9D9" }}
       >
         <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
@@ -87,65 +93,78 @@ const Sidebar: React.FC = () => {
               <img
                 src={isActive ? DashboardAfter : DashboardBefore}
                 alt="Dashboard"
-                className="w-5 h-5"
+                className="w-5 h-5 transition-all duration-200"
               />
-              <span className="ml-2">Dashboard</span>
+              <span className="ml-3 font-medium">Dashboard</span>
             </>
           )}
         </NavLink>
 
         {/* All Data */}
-        <div>
+        <div className="relative">
           <button
             onClick={() => setAllDataOpen((prev) => !prev)}
-            className={`flex items-center w-full p-2 rounded mb-2 justify-between transition cursor-pointer ${
-              isSubmenuActive
-                ? "bg-[#05254B] text-white"
+            className={`flex items-center w-full p-3 rounded-lg mb-2 justify-between transition-all duration-300 ease-out cursor-pointer transform hover:scale-[1.02] hover:shadow-sm ${isSubmenuActive
+                ? "bg-[#05254B] text-white shadow-md"
                 : "bg-[#E2E8F0] text-black hover:bg-[#BFD1EA]"
-            }`}
+              }`}
           >
             <div className="flex items-center">
               <img
                 src={isSubmenuActive ? AllDataAfter : AllDataBefore}
                 alt="All Data"
-                className="w-5 h-5"
+                className="w-5 h-5 transition-all duration-200"
               />
-              <span className="ml-2">All Data</span>
+              <span className="ml-3 font-medium">All Data</span>
             </div>
-            <span>{isAllDataOpen ? "▾" : "▸"}</span>
+            <span className={`transition-transform duration-300 ease-out ${isAllDataOpen ? "rotate-90" : "rotate-0"
+              }`}>
+              ▸
+            </span>
           </button>
 
-          {/* Submenu */}
-          {isAllDataOpen && (
-            <div className="ml-0 space-y-2">
-              {allDataSubMenu.map((item) => (
-                <NavLink
+          {/* Submenu dengan smooth animation */}
+          <div className={`overflow-hidden transition-all duration-500 ease-out ${isAllDataOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            }`}>
+            <div className="space-y-1 pb-2">
+              {allDataSubMenu.map((item, index) => (
+                <div
                   key={item.name}
-                  to={item.path}
-                  className={({ isActive }) => getMenuClass(isActive, true)}
+                  className={`transform transition-all duration-300 ease-out ${isAllDataOpen
+                      ? "translate-y-0 opacity-100"
+                      : "-translate-y-2 opacity-0"
+                    }`}
+                  style={{
+                    transitionDelay: isAllDataOpen ? `${index * 75}ms` : "0ms"
+                  }}
                 >
-                  {({ isActive }) => (
-                    <>
-                      <img
-                        src={isActive ? item.after : item.before}
-                        alt={item.name}
-                        className="w-5 h-5"
-                      />
-                      <span className="ml-2">{item.name}</span>
-                    </>
-                  )}
-                </NavLink>
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) => getMenuClass(isActive, true)}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <img
+                          src={isActive ? item.after : item.before}
+                          alt={item.name}
+                          className="w-5 h-5 transition-all duration-200"
+                        />
+                        <span className="ml-3 font-medium text-sm">{item.name}</span>
+                      </>
+                    )}
+                  </NavLink>
+                </div>
               ))}
             </div>
-          )}
+          </div>
         </div>
       </nav>
 
       {/* Logout */}
       <div className="p-4">
-        <button className="flex items-center w-full p-2 rounded bg-[#DCE4F2] hover:bg-[#BFD1EA] text-black">
-          <img src={LogoutIcon} alt="Logout" className="w-5 h-5" />
-          <span className="ml-2">Logout</span>
+        <button className="flex items-center w-full p-3 rounded-lg bg-[#DCE4F2] hover:bg-[#BFD1EA] text-black transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-sm">
+          <img src={LogoutIcon} alt="Logout" className="w-5 h-5 transition-all duration-200" />
+          <span className="ml-3 font-medium">Logout</span>
         </button>
       </div>
     </aside>
