@@ -16,6 +16,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.7.1",
+    "styled-components": "^6.1.19",
     "swr": "^2.3.6"
   },
   "devDependencies": {

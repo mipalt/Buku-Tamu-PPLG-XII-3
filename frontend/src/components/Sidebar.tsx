@@ -15,6 +15,8 @@ import KunjunganBefore from "../assets/kunjungan-before.png";
 import PerusahaanAfter from "../assets/perusahaan-after.png";
 import PerusahaanBefore from "../assets/perusahaan-before.png";
 import LogoutIcon from "../assets/Logout.png";
+import Loader from "./Loader";
+
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
