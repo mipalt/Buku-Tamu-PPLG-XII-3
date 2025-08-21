@@ -16,7 +16,7 @@ class GuestAlumniRepository
 
     public function getAllGuestAlumni(array $filters = ["name", "graduation_year", "major", "phone", "email"])
     {
-        $query = $this->alumni->query();
+        $query = $this->alumni->with('purposes');
 
         // === Search ===
         if (!empty($filters['search'])) {
