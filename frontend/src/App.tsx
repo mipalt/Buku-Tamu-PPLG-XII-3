@@ -4,6 +4,7 @@ import Parent from "./pages/all-data/parent";
 import Alumni from "./pages/all-data/alumni";
 import Layout from "./layouts/Layout";
 import Detail from "./pages/all-data/detail";
+import Visitor from "./pages/all-data/visitors";
 import Company from "./pages/all-data/company";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path="/parent" Component={Parent} />
         <Route path="/alumni" Component={Alumni} />
         <Route path="/detail" Component={Detail} />
+        <Route path="/visitor" Component={Visitor} />
         <Route path="/company" Component={Company} />
       </Route>
     </Routes>

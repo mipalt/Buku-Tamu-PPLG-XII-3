@@ -43,11 +43,15 @@ interface ApiResponse {
 }
 
 const Company: React.FC = () => {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem("token")
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState<"id" | "company_name" | null>(null);
+  const [sortColumn, setSortColumn] = useState<"id" | "company_name" | null>(
+    null
+  );
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [selectAll, setSelectAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -84,16 +88,22 @@ const Company: React.FC = () => {
   };
 
   // Filter data berdasarkan search term jika data tersedia
-  const filteredData = data?.data?.filter(company =>
-    (company.company_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (company.name?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredData =
+    data?.data?.filter(
+      (company) =>
+        (company.company_name?.toLowerCase() || "").includes(
+          searchTerm.toLowerCase()
+        ) ||
+        (company.name?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+    ) || [];
 
   // Fungsi untuk mengurutkan data
   const sortedData = [...filteredData].sort((a, b) => {
     if (!sortColumn) return 0;
-    const aValue = sortColumn === "id" ? a.id : a.company_name?.toLowerCase() || "";
-    const bValue = sortColumn === "id" ? b.id : b.company_name?.toLowerCase() || "";
+    const aValue =
+      sortColumn === "id" ? a.id : a.company_name?.toLowerCase() || "";
+    const bValue =
+      sortColumn === "id" ? b.id : b.company_name?.toLowerCase() || "";
     if (sortDirection === "asc") {
       return aValue > bValue ? 1 : -1;
     } else {
@@ -175,18 +185,23 @@ const Company: React.FC = () => {
   const performDelete = async () => {
     if (!deleteId || !token) return;
     try {
-      const response = await fetch(`http://localhost:8000/api/guest-companies/${deleteId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `http://localhost:8000/api/guest-companies/${deleteId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to delete");
       }
       // Update state lokal: Hapus item dari data
-      const updatedData = filteredData.filter((company) => company.id !== deleteId);
+      const updatedData = filteredData.filter(
+        (company) => company.id !== deleteId
+      );
       data.data = updatedData; // Update data dari useFetch (asumsi data mutable)
       closeModal();
       alert("Data berhasil dihapus");
@@ -207,12 +222,17 @@ const Company: React.FC = () => {
         type: "companies",
         format: exportFormat,
       });
-      const response = await fetch(`http://localhost:8000/api/export?${params.toString()}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+
+      const response = await fetch(
+        `http://localhost:8000/api/export?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to export data");
       }
@@ -301,7 +321,11 @@ const Company: React.FC = () => {
                   <div className="flex items-center space-x-4">
                     <select
                       value={exportFormat}
-                      onChange={(e) => setExportFormat(e.target.value as "Xlsx" | "Csv")}
+
+                      onChange={(e) =>
+                        setExportFormat(e.target.value as "Xlsx" | "Csv")
+                      }
+
                       className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-700"
                     >
                       <option value="Xlsx">Xlsx</option>
@@ -356,8 +380,10 @@ const Company: React.FC = () => {
               <th
                 className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                 onClick={() => handleSort("company_name")}
-                aria-sort={sortColumn === "company_name" ? sortDirection : "none"}
-              >
+
+                aria-sort={
+                  sortColumn === "company_name" ? sortDirection : "none"
+                }
                 <div className="flex items-center space-x-1">
                   <span>NAMA PERUSAHAAN</span>
                   {sortColumn === "company_name" && (
@@ -385,14 +411,21 @@ const Company: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {currentRows.map((company, index) => (
-              <tr key={company.id} className="even:bg-gray-50 hover:bg-gray-100">
+
+            {currentRows.map((company) => (
+              <tr
+                key={company.id}
+                className="even:bg-gray-50 hover:bg-gray-100"
+              >
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     className="rounded border-gray-300"
                     checked={selectedIds.includes(company.id)}
-                    onChange={(e) => handleCheckboxChange(company.id, e.target.checked)}
+                    onChange={(e) =>
+                      handleCheckboxChange(company.id, e.target.checked)
+                    }
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -418,7 +451,10 @@ const Company: React.FC = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
                   {company.email && company.email !== "-" ? (
-                    <a href={`mailto:${company.email}`} className="hover:text-blue-800">
+                    <a
+                      href={`mailto:${company.email}`}
+                      className="hover:text-blue-800"
+                    >
                       {company.email}
                     </a>
                   ) : (
@@ -436,7 +472,9 @@ const Company: React.FC = () => {
                   <button
                     className="text-gray-600 hover:text-gray-800 p-1 rounded"
                     onClick={() => handleView(company.id)}
-                    aria-label={`Lihat detail ${company.company_name || "perusahaan"}`}
+                    aria-label={`Lihat detail ${
+                      company.company_name || "perusahaan"
+                    }`}
                   >
                     <Eye className="w-4 h-4" />
                   </button>
@@ -450,7 +488,8 @@ const Company: React.FC = () => {
       <div className="bg-[#F4F7FC] flex items-center justify-between px-6 py-4 border-t border-gray-200">
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <span>
-            {indexOfFirstRow + 1}-{Math.min(indexOfLastRow, totalData)} of {totalData}
+            {indexOfFirstRow + 1}-{Math.min(indexOfLastRow, totalData)} of{" "}
+            {totalData}
           </span>
         </div>
         <div className="flex items-center space-x-4">
@@ -470,7 +509,9 @@ const Company: React.FC = () => {
             </select>
           </div>
           <div className="flex items-center space-x-1">
-            <span className="text-sm text-gray-500">{currentPage}/{totalPages}</span>
+            <span className="text-sm text-gray-500">
+              {currentPage}/{totalPages}
+            </span>
             <button
               className="p-1 rounded hover:bg-gray-100"
               onClick={handlePrevPage}
@@ -491,8 +532,13 @@ const Company: React.FC = () => {
       {/* Modal Konfirmasi Delete dengan Animasi Smooth */}
       {showDeleteModal && (
         <div
-          className={`fixed inset-0 flex items-center justify-center z-50 transition-all duration-300 ${isModalVisible ? "bg-black bg-opacity-30 backdrop-blur-sm" : "bg-transparent"
-            }`}
+
+          className={`fixed inset-0 flex items-center justify-center z-50 transition-all duration-300 ${
+            isModalVisible
+              ? "bg-black bg-opacity-30 backdrop-blur-sm"
+              : "bg-transparent"
+          }`}
+
         >
           <div
             className={`bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 relative transform transition-all duration-300 ease-out ${isModalVisible
@@ -540,10 +586,12 @@ const Company: React.FC = () => {
               </div>
               {/* Title & Description */}
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Hapus Data</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Hapus Data
+                </h3>
                 <p className="text-gray-600 mb-6">
-                  Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat
-                  dibatalkan.
+                  Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak
+                  dapat dibatalkan.
                 </p>
               </div>
               {/* Action Buttons */}
