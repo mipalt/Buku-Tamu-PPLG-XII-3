@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Search, Eye, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useFetch } from "../../../hooks/useFetch";
+import Loader from "../../../components/Loader";
 
 // Definisikan interface untuk respons API
 interface GuestCompany {
@@ -196,39 +197,39 @@ const Company: React.FC = () => {
   };
 
   // Fungsi untuk export data
-const handleExport = async () => {
-  if (!token) {
-    alert("Token tidak ditemukan. Silakan login ulang.");
-    return;
-  }
-  try {
-    const params = new URLSearchParams({
-      type: "companies",
-      format: exportFormat,
-    });
-    const response = await fetch(`http://localhost:8000/api/export?${params.toString()}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error("Failed to export data");
+  const handleExport = async () => {
+    if (!token) {
+      alert("Token tidak ditemukan. Silakan login ulang.");
+      return;
     }
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `guest_companies.${exportFormat.toLowerCase()}`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error(err);
-    alert("Gagal mengekspor data");
-  }
-};
+    try {
+      const params = new URLSearchParams({
+        type: "companies",
+        format: exportFormat,
+      });
+      const response = await fetch(`http://localhost:8000/api/export?${params.toString()}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to export data");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `guest_companies.${exportFormat.toLowerCase()}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mengekspor data");
+    }
+  };
 
   // Fungsi placeholder untuk view
   const handleView = (id: number) => {
@@ -263,128 +264,128 @@ const handleExport = async () => {
     <div className="bg-white min-h-screen">
       <div className="overflow-x-auto">
         <table className="min-w-full table-auto lg:table-fixed">
-<thead className="bg-[#F4F7FC] border-b border-gray-200">
-  <tr>
-    <th colSpan={8} className="px-6 py-4 text-left">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="w-8 h-8 bg-white rounded flex items-center justify-center border border-gray-300">
-            <svg
-              className="w-4 h-4 text-gray-700"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"
-              />
-            </svg>
-          </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Cari..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-80 bg-white text-gray-700 placeholder-gray-400"
-            />
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <select
-            value={exportFormat}
-            onChange={(e) => setExportFormat(e.target.value as "Xlsx" | "Csv")}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-700"
-          >
-            <option value="Xlsx">Xlsx</option>
-            <option value="Csv">Csv</option>
-          </select>
-          <button
-            className="bg-[#14804A] hover:bg-teal-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-            onClick={handleExport}
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <span>EXPORT</span>
-          </button>
-        </div>
-      </div>
-    </th>
-  </tr>
-  <tr>
-    <th className="px-6 py-4 text-left">
-      <input
-        type="checkbox"
-        className="rounded border-gray-300"
-        checked={selectAll}
-        onChange={handleSelectAll}
-      />
-    </th>
-    <th
-      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-      onClick={() => handleSort("id")}
-      aria-sort={sortColumn === "id" ? sortDirection : "none"}
-    >
-      <div className="flex items-center space-x-1">
-        <span>#</span>
-        {sortColumn === "id" && (
-          <span className="text-gray-500 text-sm">
-            {sortDirection === "asc" ? "▲" : "▼"}
-          </span>
-        )}
-      </div>
-    </th>
-    <th
-      className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-      onClick={() => handleSort("company_name")}
-      aria-sort={sortColumn === "company_name" ? sortDirection : "none"}
-    >
-      <div className="flex items-center space-x-1">
-        <span>NAMA PERUSAHAAN</span>
-        {sortColumn === "company_name" && (
-          <span className="text-gray-500 text-sm">
-            {sortDirection === "asc" ? "▲" : "▼"}
-          </span>
-        )}
-      </div>
-    </th>
-    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-      PENANGGUNG JAWAB
-    </th>
-    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-      KEPERLUAN
-    </th>
-    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-      NO. TELEPON
-    </th>
-    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-      EMAIL
-    </th>
-    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-      AKSI
-    </th>
-  </tr>
-</thead>
+          <thead className="bg-[#F4F7FC] border-b border-gray-200">
+            <tr>
+              <th colSpan={8} className="px-6 py-4 text-left">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-8 h-8 bg-white rounded flex items-center justify-center border border-gray-300">
+                      <svg
+                        className="w-4 h-4 text-gray-700"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700 w-4 h-4" />
+                      <input
+                        type="text"
+                        placeholder="Cari..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-80 bg-white text-gray-700 placeholder-gray-400"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <select
+                      value={exportFormat}
+                      onChange={(e) => setExportFormat(e.target.value as "Xlsx" | "Csv")}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-700"
+                    >
+                      <option value="Xlsx">Xlsx</option>
+                      <option value="Csv">Csv</option>
+                    </select>
+                    <button
+                      className="bg-[#14804A] hover:bg-teal-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                      onClick={handleExport}
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <span>EXPORT</span>
+                    </button>
+                  </div>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <th className="px-6 py-4 text-left">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300"
+                  checked={selectAll}
+                  onChange={handleSelectAll}
+                />
+              </th>
+              <th
+                className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("id")}
+                aria-sort={sortColumn === "id" ? sortDirection : "none"}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>#</span>
+                  {sortColumn === "id" && (
+                    <span className="text-gray-500 text-sm">
+                      {sortDirection === "asc" ? "▲" : "▼"}
+                    </span>
+                  )}
+                </div>
+              </th>
+              <th
+                className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("company_name")}
+                aria-sort={sortColumn === "company_name" ? sortDirection : "none"}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>NAMA PERUSAHAAN</span>
+                  {sortColumn === "company_name" && (
+                    <span className="text-gray-500 text-sm">
+                      {sortDirection === "asc" ? "▲" : "▼"}
+                    </span>
+                  )}
+                </div>
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                PENANGGUNG JAWAB
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                KEPERLUAN
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                NO. TELEPON
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                EMAIL
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                AKSI
+              </th>
+            </tr>
+          </thead>
           <tbody className="divide-y divide-gray-200">
-            {currentRows.map((company) => (
+            {currentRows.map((company, index) => (
               <tr key={company.id} className="even:bg-gray-50 hover:bg-gray-100">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
@@ -395,7 +396,7 @@ const handleExport = async () => {
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {company.id}
+                  {index + 1 + indexOfFirstRow}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {company.company_name || "-"}
@@ -490,16 +491,14 @@ const handleExport = async () => {
       {/* Modal Konfirmasi Delete dengan Animasi Smooth */}
       {showDeleteModal && (
         <div
-          className={`fixed inset-0 flex items-center justify-center z-50 transition-all duration-300 ${
-            isModalVisible ? "bg-black bg-opacity-30 backdrop-blur-sm" : "bg-transparent"
-          }`}
+          className={`fixed inset-0 flex items-center justify-center z-50 transition-all duration-300 ${isModalVisible ? "bg-black bg-opacity-30 backdrop-blur-sm" : "bg-transparent"
+            }`}
         >
           <div
-            className={`bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 relative transform transition-all duration-300 ease-out ${
-              isModalVisible
+            className={`bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 relative transform transition-all duration-300 ease-out ${isModalVisible
                 ? "scale-100 opacity-100 translate-y-0"
                 : "scale-95 opacity-0 translate-y-4"
-            }`}
+              }`}
           >
             {/* Close Button */}
             <button
