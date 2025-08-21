@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Search, Eye, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useFetch } from "../../../hooks/useFetch";
+import Loader from "../../../components/Loader";
 
 // Definisikan interface untuk respons API
 interface GuestCompany {
@@ -221,6 +222,7 @@ const Company: React.FC = () => {
         type: "companies",
         format: exportFormat,
       });
+
       const response = await fetch(
         `http://localhost:8000/api/export?${params.toString()}`,
         {
@@ -230,6 +232,7 @@ const Company: React.FC = () => {
           },
         }
       );
+
       if (!response.ok) {
         throw new Error("Failed to export data");
       }
@@ -318,9 +321,11 @@ const Company: React.FC = () => {
                   <div className="flex items-center space-x-4">
                     <select
                       value={exportFormat}
+
                       onChange={(e) =>
                         setExportFormat(e.target.value as "Xlsx" | "Csv")
                       }
+
                       className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-700"
                     >
                       <option value="Xlsx">Xlsx</option>
@@ -375,10 +380,10 @@ const Company: React.FC = () => {
               <th
                 className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                 onClick={() => handleSort("company_name")}
+
                 aria-sort={
                   sortColumn === "company_name" ? sortDirection : "none"
                 }
-              >
                 <div className="flex items-center space-x-1">
                   <span>NAMA PERUSAHAAN</span>
                   {sortColumn === "company_name" && (
@@ -406,11 +411,13 @@ const Company: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
+
             {currentRows.map((company) => (
               <tr
                 key={company.id}
                 className="even:bg-gray-50 hover:bg-gray-100"
               >
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
@@ -422,7 +429,7 @@ const Company: React.FC = () => {
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {company.id}
+                  {index + 1 + indexOfFirstRow}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {company.company_name || "-"}
@@ -525,18 +532,19 @@ const Company: React.FC = () => {
       {/* Modal Konfirmasi Delete dengan Animasi Smooth */}
       {showDeleteModal && (
         <div
+
           className={`fixed inset-0 flex items-center justify-center z-50 transition-all duration-300 ${
             isModalVisible
               ? "bg-black bg-opacity-30 backdrop-blur-sm"
               : "bg-transparent"
           }`}
+
         >
           <div
-            className={`bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 relative transform transition-all duration-300 ease-out ${
-              isModalVisible
+            className={`bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 relative transform transition-all duration-300 ease-out ${isModalVisible
                 ? "scale-100 opacity-100 translate-y-0"
                 : "scale-95 opacity-0 translate-y-4"
-            }`}
+              }`}
           >
             {/* Close Button */}
             <button

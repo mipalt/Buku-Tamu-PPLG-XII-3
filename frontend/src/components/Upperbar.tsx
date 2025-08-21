@@ -4,6 +4,16 @@ import KunjunganIcon from "../assets/kunjungan-after.png";
 import AlumniIcon from "../assets/alumni-after.png";
 import PerusahaanIcon from "../assets/perusahaan-after.png";
 
+// Komponen CustomLoading
+const CustomLoading: React.FC<{ message?: string }> = ({ message = "Memuat..." }) => {
+  return (
+    <div className="flex items-center space-x-2">
+      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
+      <span className="text-sm text-gray-700">{message}</span>
+    </div>
+  );
+};
+
 // Asumsi base URL untuk API
 const API_BASE_URL = "http://localhost:8000/api"; // Ganti dengan URL API Anda
 // Asumsi token disimpan di localStorage
@@ -30,44 +40,31 @@ export default function Upperbar() {
 
   // Membuat array stats berdasarkan data dari API
   const stats = [
-  {
-    name: "Orang Tua",
-    value: parentsLoading
-      ? "Loading..."
-      : parentsError
-        ? "Error"
-        : parentsData?.meta?.pagination?.total_data?.toString() || "0",
-    icon: OrangTuaIcon,
-  },
-  {
-    name: "Kunjungan",
-    value: visitorsLoading
-      ? "Loading..."
-      : visitorsError
-        ? "Error"
-        : visitorsData?.meta?.pagination?.total_data?.toString() || "0",
-    icon: KunjunganIcon,
-  },
-  {
-    name: "Alumni",
-    value: alumniLoading
-      ? "Loading..."
-      : alumniError
-        ? "Error"
-        : alumniData?.meta?.pagination?.total_data?.toString() || "0",
-    icon: AlumniIcon,
-  },
-  {
-    name: "Perusahaan",
-    value: companiesLoading
-      ? "Loading..."
-      : companiesError
-        ? "Error"
-        : companiesData?.meta?.pagination?.total_data?.toString() || "0",
-    icon: PerusahaanIcon,
-  },
-];
-
+    {
+      name: "Orang Tua",
+      value: parentsError ? "Error" : parentsData?.meta?.pagination?.total_data?.toString() || "0",
+      icon: OrangTuaIcon,
+      isLoading: parentsLoading,
+    },
+    {
+      name: "Kunjungan",
+      value: visitorsError ? "Error" : visitorsData?.meta?.pagination?.total_data?.toString() || "0",
+      icon: KunjunganIcon,
+      isLoading: visitorsLoading,
+    },
+    {
+      name: "Alumni",
+      value: alumniError ? "Error" : alumniData?.meta?.pagination?.total_data?.toString() || "0",
+      icon: AlumniIcon,
+      isLoading: alumniLoading,
+    },
+    {
+      name: "Perusahaan",
+      value: companiesError ? "Error" : companiesData?.meta?.pagination?.total_data?.toString() || "0",
+      icon: PerusahaanIcon,
+      isLoading: companiesLoading,
+    },
+  ];
 
   return (
     <>
@@ -87,7 +84,11 @@ export default function Upperbar() {
               </div>
               <div>
                 <p className="text-sm font-bold transition-colors duration-200">{item.name}</p>
-                <p className="text-lg font-bold transition-colors duration-200">{item.value}</p>
+                {item.isLoading ? (
+                  <CustomLoading message={`Memuat ${item.name}...`} />
+                ) : (
+                  <p className="text-lg font-bold transition-colors duration-200">{item.value}</p>
+                )}
               </div>
             </div>
           ))}
