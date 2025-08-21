@@ -11,6 +11,14 @@ interface GuestAlumni {
   email: string;
   signature_path?: string;
   created_at?: string;
+  purposes: {
+    id: number;
+    purpose: string;
+    visitor_id: number;
+    guest_type: string;
+    created_at?: string;
+    updated_at?: string;
+  };
 }
 
 interface ApiResponse {
@@ -75,6 +83,17 @@ const AlumniPage: React.FC = () => {
       return aValue < bValue ? 1 : -1;
     }
   });
+
+  // Fungsi untuk mendapatkan warna badge(purpose)
+  const getStatusColor = (purpose: string) => {
+    if (purpose.toUpperCase().includes("RAPOT")) {
+      return "bg-blue-100 text-blue-700 border-blue-200";
+    } else if (purpose.toUpperCase().includes("MEETING")) {
+      return "bg-purple-100 text-purple-700 border-green-200";
+    } else {
+      return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
 
   // Logika pagination
   const indexOfLastRow = currentPage * rowsPerPage;
@@ -385,7 +404,13 @@ const AlumniPage: React.FC = () => {
                      {alumni.graduation_year || "-"}
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                     {alumni.purpose || "-"}
+                    <span
+                    className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                      alumni.purposes?.purpose || "UNKNOWN"
+                    )}`}
+                  >
+                     {alumni.purposes?.purpose || "UNKNOWN"}
+                  </span>
                    </td>
                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {alumni.major || "-"}
@@ -397,14 +422,14 @@ const AlumniPage: React.FC = () => {
                      <button
                        className="text-red-600 hover:text-red-800 p-1 rounded"
                        onClick={() => confirmDelete(alumni.id)}
-                       aria-label={`Hapus ${alumni.alumni_name || "perusahaan"}`}
+                       aria-label={`Hapus ${alumni.name || "data alumni"}`}
                      >
                        <Trash2 className="w-4 h-4" />
                      </button>
                      <button
                        className="text-gray-600 hover:text-gray-800 p-1 rounded"
                        onClick={() => handleView(alumni.id)}
-                       aria-label={`Lihat detail ${alumni.alumni_name || "perusahaan"}`}
+                       aria-label={`Lihat detail ${alumni.name || "data alumni"}`}
                      >
                        <Eye className="w-4 h-4" />
                      </button>
